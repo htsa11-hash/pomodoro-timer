@@ -1,0 +1,90 @@
+import { rankLabel } from '../game/deck'
+import { getStageInstruction } from '../game/interaction'
+import type { GameAction, GameState } from '../game/types'
+import './Controls.css'
+
+interface ControlsProps {
+  state: GameState
+  dispatch: React.Dispatch<GameAction>
+}
+
+const EFFECT_DESCRIPTIONS: Record<number, string> = {
+  10: '10（ソタ）：自分のカードを1枚見ることができます。',
+  11: '11（カバロ）：相手のカードを1枚見ることができます。',
+  12: '12（レイ）：自分と相手のカードを1枚ずつ、中身を見ずに交換できます。',
+}
+
+export default function Controls({ state, dispatch }: ControlsProps) {
+  const instruction = getStageInstruction(state)
+  const activePlayer = state.players[state.currentPlayerIndex]
+  const canOpenMatch =
+    state.discard.length > 0 &&
+    !state.overlay &&
+    !state.matchAttempt &&
+    state.stage !== 'setup' &&
+    state.stage !== 'initial-peek' &&
+    state.stage !== 'round-end'
+
+  return (
+    <div className="controls">
+      {state.stage === 'turn-start' && (
+        <div className="controls__row">
+          <p className="controls__hint">{activePlayer.name} さんのターンです。</p>
+          <button type="button" className="btn btn--primary" onClick={() => dispatch({ type: 'DRAW_CARD' })}>
+            山札から引く
+          </button>
+          <button
+            type="button"
+            className="btn btn--cabo"
+            disabled={state.caboDeclaredBy !== null}
+            onClick={() => dispatch({ type: 'DECLARE_CABO' })}
+          >
+            Cabo 宣言
+          </button>
+        </div>
+      )}
+
+      {state.stage === 'drawn' && (
+        <div className="controls__row">
+          <p className="controls__hint">{instruction}</p>
+          <button type="button" className="btn btn--secondary" onClick={() => dispatch({ type: 'DISCARD_DRAWN' })}>
+            そのまま捨てる
+          </button>
+        </div>
+      )}
+
+      {state.stage === 'effect-choice' && state.pendingEffectCard && (
+        <div className="controls__row">
+          <p className="controls__hint">
+            捨てたカードは {rankLabel(state.pendingEffectCard.rank)} です。
+            <br />
+            {EFFECT_DESCRIPTIONS[state.pendingEffectCard.rank]}
+          </p>
+          <button type="button" className="btn btn--primary" onClick={() => dispatch({ type: 'USE_EFFECT' })}>
+            効果を使う
+          </button>
+          <button type="button" className="btn btn--secondary" onClick={() => dispatch({ type: 'SKIP_EFFECT' })}>
+            使わない
+          </button>
+        </div>
+      )}
+
+      {(state.stage === 'effect-10-select' ||
+        state.stage === 'effect-11-select' ||
+        state.stage === 'effect-12-select-own' ||
+        state.stage === 'effect-12-select-target') && (
+        <div className="controls__row">
+          <p className="controls__hint">{instruction}</p>
+        </div>
+      )}
+
+      {canOpenMatch && (
+        <div className="controls__row controls__row--secondary">
+          <button type="button" className="btn btn--ghost" onClick={() => dispatch({ type: 'OPEN_MATCH_ATTEMPT' })}>
+            捨て札と同じ数字に挑戦する
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}

@@ -1,0 +1,108 @@
+.card-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.card-slot__label {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.card {
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  padding: 0;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.card--small {
+  width: 44px;
+  height: 64px;
+}
+
+.card--medium {
+  width: 60px;
+  height: 86px;
+}
+
+.card--large {
+  width: 88px;
+  height: 124px;
+}
+
+.card--back {
+  background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+}
+
+.card--back .card__back-pattern {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1px;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-radius: 8px;
+  width: calc(100% - 10px);
+  height: calc(100% - 10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card--front {
+  background: #fffaf0;
+  border: 1px solid #e5e0d5;
+}
+
+.card__face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-weight: 700;
+}
+
+.card--small .card__face {
+  font-size: 13px;
+}
+
+.card--medium .card__face {
+  font-size: 17px;
+}
+
+.card--large .card__face {
+  font-size: 26px;
+}
+
+.card__suit {
+  font-size: 0.85em;
+}
+
+.card--clickable {
+  cursor: pointer;
+}
+
+.card--clickable:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.28);
+}
+
+.card--highlight {
+  outline: 3px solid #f59e0b;
+  outline-offset: 2px;
+}
+
+.card--disabled {
+  opacity: 0.55;
+}
+
+.card:disabled {
+  cursor: default;
+}

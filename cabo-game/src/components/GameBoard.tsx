@@ -1,0 +1,114 @@
+import { rankLabel } from '../game/deck'
+import type { GameAction, GameState } from '../game/types'
+import Card from './Card'
+import Controls from './Controls'
+import MatchAttemptModal from './MatchAttemptModal'
+import PlayerArea from './PlayerArea'
+import RevealOverlay from './RevealOverlay'
+import ScoreResult from './ScoreResult'
+import './GameBoard.css'
+
+interface GameBoardProps {
+  state: GameState
+  dispatch: React.Dispatch<GameAction>
+}
+
+export default function GameBoard({ state, dispatch }: GameBoardProps) {
+  const topDiscard = state.discard[state.discard.length - 1]
+  const activePlayer = state.players[state.currentPlayerIndex]
+
+  const handleCardClick = (playerIndex: number, cardIndex: number) => {
+    dispatch({ type: 'SELECT_CARD', playerIndex, cardIndex })
+  }
+
+  return (
+    <div className="game-board">
+      <header className="game-board__status">
+        <div className="game-board__piles">
+          <div className="game-board__pile">
+            <Card faceDown size="medium" />
+            <span className="game-board__pile-label">山札（{state.deck.length}枚）</span>
+          </div>
+          <div className="game-board__pile">
+            {topDiscard ? (
+              <Card card={topDiscard} size="medium" label={rankLabel(topDiscard.rank)} />
+            ) : (
+              <Card faceDown size="medium" />
+            )}
+            <span className="game-board__pile-label">捨て札</span>
+          </div>
+        </div>
+
+        <div className="game-board__turn-info">
+          {state.stage === 'initial-peek' && state.initialPeek ? (
+            <p>
+              <strong>{state.players[state.initialPeek.playerIndex].name}</strong> さんがカードを確認中
+              （{state.initialPeek.pickedIndices.length} / 2 枚）
+            </p>
+          ) : state.stage === 'round-end' ? (
+            <p>ラウンド終了</p>
+          ) : (
+            <p>
+              現在の手番：<strong>{activePlayer.name}</strong>
+              {state.caboDeclaredBy !== null && (
+                <span className="game-board__cabo-note">
+                  {' '}
+                  ／ {state.players[state.caboDeclaredBy].name} が Cabo 宣言中（残り {state.finalTurnsRemaining} ターン）
+                </span>
+              )}
+            </p>
+          )}
+        </div>
+      </header>
+
+      {state.stage === 'initial-peek' && state.initialPeek && (
+        <div className="game-board__peek-banner">
+          <p>
+            {state.players[state.initialPeek.playerIndex].name} さん、自分のカードを2枚タップして確認してください。
+            （他のプレイヤーは画面を見ないようにしましょう）
+          </p>
+          {state.initialPeek.pickedIndices.length >= 2 && (
+            <button type="button" className="btn btn--primary" onClick={() => dispatch({ type: 'CONFIRM_PEEK_DONE' })}>
+              確認完了・次のプレイヤーへ
+            </button>
+          )}
+        </div>
+      )}
+
+      <div className="game-board__players">
+        {state.players.map((_, index) => (
+          <PlayerArea key={index} state={state} playerIndex={index} onCardClick={handleCardClick} />
+        ))}
+      </div>
+
+      {state.stage === 'round-end' ? (
+        <ScoreResult state={state} dispatch={dispatch} />
+      ) : (
+        <Controls state={state} dispatch={dispatch} />
+      )}
+
+      <section className="game-board__log">
+        <h3>ログ</h3>
+        <ul>
+          {state.log
+            .slice(-6)
+            .reverse()
+            .map((entry, i) => (
+              <li key={i}>{entry}</li>
+            ))}
+        </ul>
+      </section>
+
+      {state.overlay && <RevealOverlay overlay={state.overlay} players={state.players} onDismiss={() => dispatch({ type: 'DISMISS_OVERLAY' })} />}
+
+      {state.matchAttempt && (
+        <MatchAttemptModal
+          state={state}
+          onSelectPlayer={(playerIndex) => dispatch({ type: 'MATCH_SELECT_PLAYER', playerIndex })}
+          onSelectCard={(cardIndex) => dispatch({ type: 'MATCH_SELECT_CARD', cardIndex })}
+          onCancel={() => dispatch({ type: 'CANCEL_MATCH_ATTEMPT' })}
+        />
+      )}
+    </div>
+  )
+}
