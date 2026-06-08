@@ -1,0 +1,159 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', 'Hiragino Kaku Gothic ProN', sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  padding: 20px;
+}
+
+.app {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  padding: 32px;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 24px;
+  color: #d35400;
+}
+
+.mode-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.mode-btn {
+  flex: 1;
+  padding: 10px 6px;
+  border: 2px solid #e67e22;
+  background: #fff;
+  color: #e67e22;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.mode-btn.active,
+.mode-btn:hover {
+  background: #e67e22;
+  color: #fff;
+}
+
+.timer-display {
+  font-size: 64px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 24px;
+  letter-spacing: 2px;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.controls button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: #e67e22;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.controls button:hover:not(:disabled) {
+  background: #d35400;
+}
+
+.controls button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.task-section {
+  text-align: left;
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+}
+
+.task-section h2 {
+  font-size: 18px;
+  margin-bottom: 12px;
+  color: #2c3e50;
+}
+
+#taskForm {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+#taskInput {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+#taskForm button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #2c3e50;
+  color: #fff;
+  cursor: pointer;
+}
+
+#taskList {
+  list-style: none;
+  margin-bottom: 16px;
+}
+
+#taskList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f9f9f9;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+#taskList li.done span.task-text {
+  text-decoration: line-through;
+  color: #aaa;
+}
+
+#taskList li .actions button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+  margin-left: 6px;
+}
+
+.completed-count {
+  font-size: 14px;
+  color: #555;
+  text-align: center;
+}
