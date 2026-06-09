@@ -30,18 +30,7 @@ export default function Controls({ state, dispatch }: ControlsProps) {
     <div className="controls">
       {state.stage === 'turn-start' && (
         <div className="controls__row">
-          <p className="controls__hint">{activePlayer.name} さんのターンです。</p>
-          <button type="button" className="btn btn--primary" onClick={() => dispatch({ type: 'DRAW_CARD' })}>
-            山札から引く
-          </button>
-          <button
-            type="button"
-            className="btn btn--cabo"
-            disabled={state.caboDeclaredBy !== null}
-            onClick={() => dispatch({ type: 'DECLARE_CABO' })}
-          >
-            Cabo 宣言
-          </button>
+          <p className="controls__hint">{activePlayer.name} さんのターンです。カードを引いています…</p>
         </div>
       )}
 
@@ -50,6 +39,14 @@ export default function Controls({ state, dispatch }: ControlsProps) {
           <p className="controls__hint">{instruction}</p>
           <button type="button" className="btn btn--secondary" onClick={() => dispatch({ type: 'DISCARD_DRAWN' })}>
             そのまま捨てる
+          </button>
+          <button
+            type="button"
+            className="btn btn--cabo"
+            disabled={state.caboDeclaredBy !== null}
+            onClick={() => dispatch({ type: 'DECLARE_CABO' })}
+          >
+            Cabo 宣言
           </button>
         </div>
       )}

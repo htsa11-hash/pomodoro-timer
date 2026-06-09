@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { rankLabel } from '../game/deck'
 import type { CoinSession, GameAction, GameState } from '../game/types'
 import Card from './Card'
@@ -19,6 +20,12 @@ interface GameBoardProps {
 export default function GameBoard({ state, dispatch, coinSession, onNextRound, onNewGame }: GameBoardProps) {
   const topDiscard = state.discard[state.discard.length - 1]
   const activePlayer = state.players[state.currentPlayerIndex]
+
+  useEffect(() => {
+    if (state.stage === 'turn-start' && !state.overlay) {
+      dispatch({ type: 'DRAW_CARD' })
+    }
+  }, [state.stage, state.overlay, dispatch])
 
   const handleCardClick = (playerIndex: number, cardIndex: number) => {
     dispatch({ type: 'SELECT_CARD', playerIndex, cardIndex })

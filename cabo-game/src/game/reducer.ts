@@ -190,11 +190,16 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'DECLARE_CABO': {
-      if (state.stage !== 'turn-start' || state.caboDeclaredBy !== null) return state
+      if (state.caboDeclaredBy !== null) return state
+      if (state.stage !== 'turn-start' && state.stage !== 'drawn') return state
       const player = state.players[state.currentPlayerIndex]
+      // If a card was already drawn, put it on the discard pile before declaring
+      const discard = state.drawnCard ? [...state.discard, state.drawnCard] : state.discard
       const declared = withLog(
         {
           ...state,
+          drawnCard: null,
+          discard,
           caboDeclaredBy: state.currentPlayerIndex,
           finalTurnsRemaining: state.players.length - 1,
         },
