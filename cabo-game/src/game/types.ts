@@ -24,6 +24,7 @@ export type Stage =
   | 'effect-11-select'
   | 'effect-12-select-own'
   | 'effect-12-select-target'
+  | 'turn-done'
   | 'round-end'
 
 export interface OverlayCard {
@@ -66,6 +67,8 @@ export interface GameState {
   initialPeek: InitialPeekState | null
   overlay: Overlay | null
   matchAttempt: MatchAttemptState | null
+  /** playerIndex → card indices the player has peeked this turn (cleared when their turn ends) */
+  peekHighlights: Record<number, number[]>
   log: string[]
 }
 
@@ -89,4 +92,5 @@ export type GameAction =
   | { type: 'CANCEL_MATCH_ATTEMPT' }
   | { type: 'MATCH_SELECT_PLAYER'; playerIndex: number }
   | { type: 'MATCH_SELECT_CARD'; cardIndex: number }
+  | { type: 'END_TURN' }
   | { type: 'RESTART' }

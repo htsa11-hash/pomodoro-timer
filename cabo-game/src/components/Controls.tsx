@@ -23,7 +23,8 @@ export default function Controls({ state, dispatch }: ControlsProps) {
     !state.matchAttempt &&
     state.stage !== 'setup' &&
     state.stage !== 'initial-peek' &&
-    state.stage !== 'round-end'
+    state.stage !== 'round-end' &&
+    state.stage !== 'turn-done'
 
   return (
     <div className="controls">
@@ -75,6 +76,18 @@ export default function Controls({ state, dispatch }: ControlsProps) {
         state.stage === 'effect-12-select-target') && (
         <div className="controls__row">
           <p className="controls__hint">{instruction}</p>
+        </div>
+      )}
+
+      {state.stage === 'turn-done' && (
+        <div className="controls__row">
+          <p className="controls__hint">カードを捨てました。マッチを試みるか、ターンを終了してください。</p>
+          <button type="button" className="btn btn--primary" onClick={() => dispatch({ type: 'END_TURN' })}>
+            ターン終了
+          </button>
+          <button type="button" className="btn btn--ghost" onClick={() => dispatch({ type: 'OPEN_MATCH_ATTEMPT' })}>
+            捨て札と同じ数字に挑戦する
+          </button>
         </div>
       )}
 

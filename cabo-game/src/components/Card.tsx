@@ -7,17 +7,19 @@ interface CardProps {
   faceDown?: boolean
   size?: 'small' | 'medium' | 'large'
   highlight?: boolean
+  peeked?: boolean
   disabled?: boolean
   label?: string
   onClick?: () => void
 }
 
-export default function Card({ card, faceDown = false, size = 'medium', highlight = false, disabled = false, label, onClick }: CardProps) {
+export default function Card({ card, faceDown = false, size = 'medium', highlight = false, peeked = false, disabled = false, label, onClick }: CardProps) {
   const classNames = [
     'card',
     `card--${size}`,
     faceDown || !card ? 'card--back' : 'card--front',
     highlight ? 'card--highlight' : '',
+    peeked ? 'card--peeked' : '',
     onClick && !disabled ? 'card--clickable' : '',
     disabled ? 'card--disabled' : '',
   ]

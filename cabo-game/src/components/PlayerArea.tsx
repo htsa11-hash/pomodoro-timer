@@ -26,6 +26,8 @@ export default function PlayerArea({ state, playerIndex, onCardClick }: PlayerAr
       <div className="player-area__hand">
         {player.hand.map((card, cardIndex) => {
           const { clickable, highlight } = getCardInteraction(state, playerIndex, cardIndex)
+          const peekedIndices = state.stage !== 'initial-peek' ? (state.peekHighlights[playerIndex] ?? []) : []
+          const peeked = peekedIndices.includes(cardIndex)
           return (
             <Card
               key={card.id}
@@ -33,6 +35,7 @@ export default function PlayerArea({ state, playerIndex, onCardClick }: PlayerAr
               size="medium"
               label={`${cardIndex + 1}`}
               highlight={highlight}
+              peeked={peeked}
               onClick={clickable ? () => onCardClick(playerIndex, cardIndex) : undefined}
             />
           )

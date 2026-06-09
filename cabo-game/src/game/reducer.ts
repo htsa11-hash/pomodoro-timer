@@ -19,6 +19,7 @@ export function createInitialState(): GameState {
     initialPeek: null,
     overlay: null,
     matchAttempt: null,
+    peekHighlights: {},
     log: [],
   }
 }
@@ -31,9 +32,16 @@ function clonePlayers(players: PlayerState[]): PlayerState[] {
   return players.map((p) => ({ ...p, hand: [...p.hand] }))
 }
 
+/** Clears current player's peek highlights and in-flight card state, sets stage to turn-done. */
+function readyForTurnDone(state: GameState): GameState {
+  return { ...state, stage: 'turn-done', drawnCard: null, pendingEffectCard: null, pendingSelection: null }
+}
+
 /** Ends the current player's turn and figures out what happens next. */
 function advanceTurn(state: GameState): GameState {
-  const cleared = { ...state, drawnCard: null, pendingEffectCard: null, pendingSelection: null }
+  const peekHighlights = { ...state.peekHighlights }
+  delete peekHighlights[state.currentPlayerIndex]
+  const cleared = { ...state, drawnCard: null, pendingEffectCard: null, pendingSelection: null, peekHighlights }
 
   if (cleared.caboDeclaredBy !== null) {
     const remaining = cleared.finalTurnsRemaining - 1
@@ -163,7 +171,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (isSpecialRank(card.rank)) {
         return { ...base, stage: 'effect-choice', pendingEffectCard: card }
       }
-      return advanceTurn(base)
+      return readyForTurnDone(base)
     }
 
     case 'USE_EFFECT': {
@@ -178,7 +186,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'SKIP_EFFECT': {
       if (state.stage !== 'effect-choice') return state
-      return advanceTurn(withLog(state, '効果を使いませんでした。'))
+      return readyForTurnDone(withLog(state, '効果を使いませんでした。'))
     }
 
     case 'DECLARE_CABO': {
@@ -221,7 +229,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (!state.overlay) return state
       const { then } = state.overlay
       const cleared = { ...state, overlay: null }
-      return then === 'advance-turn' ? advanceTurn(cleared) : cleared
+      return then === 'advance-turn' ? readyForTurnDone(cleared) : cleared
+    }
+
+    case 'END_TURN': {
+      if (state.stage !== 'turn-done') return state
+      return advanceTurn(state)
     }
 
     default:
@@ -238,9 +251,11 @@ function handleSelectCard(state: GameState, playerIndex: number, cardIndex: numb
 
       const player = state.players[playerIndex]
       const card = player.hand[cardIndex]
+      const prevIndices = state.peekHighlights[playerIndex] ?? []
       return {
         ...state,
         initialPeek: { ...peek, pickedIndices: [...peek.pickedIndices, cardIndex] },
+        peekHighlights: { ...state.peekHighlights, [playerIndex]: [...prevIndices, cardIndex] },
         overlay: {
           viewerIndex: playerIndex,
           heading: `${player.name} のカード（位置 ${cardIndex + 1}）`,
@@ -267,15 +282,17 @@ function handleSelectCard(state: GameState, playerIndex: number, cardIndex: numb
       if (isSpecialRank(oldCard.rank)) {
         return { ...base, stage: 'effect-choice', pendingEffectCard: oldCard }
       }
-      return advanceTurn(base)
+      return readyForTurnDone(base)
     }
 
     case 'effect-10-select': {
       if (playerIndex !== state.currentPlayerIndex) return state
       const player = state.players[playerIndex]
       const card = player.hand[cardIndex]
+      const prevIndices = state.peekHighlights[playerIndex] ?? []
       return {
         ...state,
+        peekHighlights: { ...state.peekHighlights, [playerIndex]: [...prevIndices, cardIndex] },
         overlay: {
           viewerIndex: playerIndex,
           heading: '自分のカードを確認（効果：10）',
@@ -323,11 +340,8 @@ function handleSelectCard(state: GameState, playerIndex: number, cardIndex: numb
       me.hand[ownIndex] = them.hand[cardIndex]
       them.hand[cardIndex] = tmp
 
-      const advanced = advanceTurn({ ...state, players, pendingSelection: null })
-      return withLog(
-        advanced,
-        `${me.name} は ${them.name} と中身を見ずにカードを交換しました（効果：12）。`,
-      )
+      const done = readyForTurnDone({ ...state, players, pendingSelection: null })
+      return withLog(done, `${me.name} は ${them.name} と中身を見ずにカードを交換しました（効果：12）。`)
     }
 
     default:

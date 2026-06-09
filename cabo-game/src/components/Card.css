@@ -99,6 +99,15 @@
   outline-offset: 2px;
 }
 
+@keyframes peek-glow {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.5), 0 0 12px rgba(34, 211, 238, 0.4); }
+  50%       { box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.9), 0 0 20px rgba(34, 211, 238, 0.7); }
+}
+
+.card--peeked {
+  animation: peek-glow 1.6s ease-in-out infinite;
+}
+
 .card--disabled {
   opacity: 0.55;
 }
