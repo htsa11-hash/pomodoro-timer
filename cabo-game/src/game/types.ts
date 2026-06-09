@@ -69,6 +69,12 @@ export interface GameState {
   log: string[]
 }
 
+export interface CoinSession {
+  playerNames: string[]
+  balances: number[]
+  betAmount: number
+}
+
 export type GameAction =
   | { type: 'START_GAME'; names: string[] }
   | { type: 'CONFIRM_PEEK_DONE' }

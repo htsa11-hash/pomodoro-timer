@@ -1,5 +1,5 @@
 import { rankLabel } from '../game/deck'
-import type { GameAction, GameState } from '../game/types'
+import type { CoinSession, GameAction, GameState } from '../game/types'
 import Card from './Card'
 import Controls from './Controls'
 import MatchAttemptModal from './MatchAttemptModal'
@@ -11,9 +11,12 @@ import './GameBoard.css'
 interface GameBoardProps {
   state: GameState
   dispatch: React.Dispatch<GameAction>
+  coinSession: CoinSession
+  onNextRound: (newBalances: number[]) => void
+  onNewGame: () => void
 }
 
-export default function GameBoard({ state, dispatch }: GameBoardProps) {
+export default function GameBoard({ state, dispatch, coinSession, onNextRound, onNewGame }: GameBoardProps) {
   const topDiscard = state.discard[state.discard.length - 1]
   const activePlayer = state.players[state.currentPlayerIndex]
 
@@ -82,7 +85,12 @@ export default function GameBoard({ state, dispatch }: GameBoardProps) {
       </div>
 
       {state.stage === 'round-end' ? (
-        <ScoreResult state={state} dispatch={dispatch} />
+        <ScoreResult
+          state={state}
+          coinSession={coinSession}
+          onNextRound={onNextRound}
+          onNewGame={onNewGame}
+        />
       ) : (
         <Controls state={state} dispatch={dispatch} />
       )}
