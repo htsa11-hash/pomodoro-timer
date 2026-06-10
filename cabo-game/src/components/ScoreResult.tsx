@@ -6,6 +6,7 @@ import './ScoreResult.css'
 interface ScoreResultProps {
   state: GameState
   coinSession: CoinSession
+  canControl?: boolean
   onNextRound: (newBalances: number[]) => void
   onNewGame: () => void
 }
@@ -29,7 +30,7 @@ function computeCoinTransfers(
   return { coinChanges, newBalances }
 }
 
-export default function ScoreResult({ state, coinSession, onNextRound, onNewGame }: ScoreResultProps) {
+export default function ScoreResult({ state, coinSession, canControl = true, onNextRound, onNewGame }: ScoreResultProps) {
   const ranked = state.players
     .map((player) => ({ player, total: totalScore(player) }))
     .sort((a, b) => a.total - b.total)
@@ -86,14 +87,18 @@ export default function ScoreResult({ state, coinSession, onNextRound, onNewGame
         })}
       </div>
 
-      <div className="score-result__actions">
-        <button type="button" className="btn btn--primary" onClick={() => onNextRound(newBalances)}>
-          次のラウンドへ
-        </button>
-        <button type="button" className="btn btn--secondary" onClick={onNewGame}>
-          新しいゲーム
-        </button>
-      </div>
+      {canControl ? (
+        <div className="score-result__actions">
+          <button type="button" className="btn btn--primary" onClick={() => onNextRound(newBalances)}>
+            次のラウンドへ
+          </button>
+          <button type="button" className="btn btn--secondary" onClick={onNewGame}>
+            新しいゲーム
+          </button>
+        </div>
+      ) : (
+        <p className="score-result__waiting">ホストが次のアクションを選択しています…</p>
+      )}
     </div>
   )
 }

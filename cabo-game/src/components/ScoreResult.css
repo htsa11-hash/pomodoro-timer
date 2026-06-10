@@ -129,6 +129,12 @@
   gap: 10px;
 }
 
+.score-result__waiting {
+  text-align: center;
+  font-size: 13px;
+  color: #6b7280;
+}
+
 .btn--secondary {
   border: 2px solid #e5e7eb;
   border-radius: 12px;

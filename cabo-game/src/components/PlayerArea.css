@@ -50,6 +50,11 @@
   color: #b91c1c;
 }
 
+.player-area__badge--you {
+  background: #dcfce7;
+  color: #15803d;
+}
+
 .player-area__hand {
   display: flex;
   gap: 8px;

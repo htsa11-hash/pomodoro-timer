@@ -1,63 +1,20 @@
-import { useReducer, useState } from 'react'
-import GameBoard from './components/GameBoard'
-import SetupScreen from './components/SetupScreen'
-import { createInitialState, gameReducer } from './game/reducer'
-import type { CoinSession } from './game/types'
+import { useState } from 'react'
+import ModeSelectScreen from './components/ModeSelectScreen'
+import OfflineApp from './components/OfflineApp'
+import OnlineApp from './components/OnlineApp'
 import './App.css'
 
+type Mode = 'offline' | 'online' | null
+
 export default function App() {
-  const [state, dispatch] = useReducer(gameReducer, undefined, createInitialState)
-  const [coinSession, setCoinSession] = useState<CoinSession | null>(null)
-
-  function handleStart(names: string[], startingCoins: number, betAmount: number) {
-    setCoinSession({ playerNames: names, balances: names.map(() => startingCoins), betAmount })
-    dispatch({ type: 'START_GAME', names })
-  }
-
-  function handleRematch(betAmount: number) {
-    if (!coinSession) return
-    setCoinSession((prev) => (prev ? { ...prev, betAmount } : null))
-    dispatch({ type: 'START_GAME', names: coinSession.playerNames })
-  }
-
-  function handleNextRound(newBalances: number[]) {
-    setCoinSession((prev) => (prev ? { ...prev, balances: newBalances } : null))
-    dispatch({ type: 'RESTART' })
-  }
-
-  function handleNewGame() {
-    setCoinSession(null)
-    dispatch({ type: 'RESTART' })
-  }
-
-  const fallbackSession: CoinSession = {
-    playerNames: state.players.map((p) => p.name),
-    balances: state.players.map(() => 0),
-    betAmount: 0,
-  }
+  const [mode, setMode] = useState<Mode>(null)
 
   return (
     <div className="app">
       <div className="app__container">
-        {state.stage === 'setup' ? (
-          coinSession ? (
-            <SetupScreen
-              onStart={(_, __, betAmount) => handleRematch(betAmount)}
-              existingSession={coinSession}
-              onNewGame={handleNewGame}
-            />
-          ) : (
-            <SetupScreen onStart={handleStart} />
-          )
-        ) : (
-          <GameBoard
-            state={state}
-            dispatch={dispatch}
-            coinSession={coinSession ?? fallbackSession}
-            onNextRound={handleNextRound}
-            onNewGame={handleNewGame}
-          />
-        )}
+        {mode === null && <ModeSelectScreen onSelectOffline={() => setMode('offline')} onSelectOnline={() => setMode('online')} />}
+        {mode === 'offline' && <OfflineApp onBack={() => setMode(null)} />}
+        {mode === 'online' && <OnlineApp onBack={() => setMode(null)} />}
       </div>
     </div>
   )

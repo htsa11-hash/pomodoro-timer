@@ -6,6 +6,7 @@ interface SetupScreenProps {
   onStart: (names: string[], startingCoins: number, betAmount: number) => void
   existingSession?: CoinSession
   onNewGame?: () => void
+  onBack?: () => void
 }
 
 const MIN_PLAYERS = 2
@@ -13,7 +14,7 @@ const MAX_PLAYERS = 6
 const DEFAULT_STARTING_COINS = 1000
 const DEFAULT_BET = 100
 
-export default function SetupScreen({ onStart, existingSession, onNewGame }: SetupScreenProps) {
+export default function SetupScreen({ onStart, existingSession, onNewGame, onBack }: SetupScreenProps) {
   const [count, setCount] = useState(existingSession ? existingSession.playerNames.length : 4)
   const [names, setNames] = useState<string[]>(
     existingSession
@@ -177,6 +178,12 @@ export default function SetupScreen({ onStart, existingSession, onNewGame }: Set
           <li>勝者は全プレイヤーのベット分のコインを獲得します。引き分けの場合は山分けです。</li>
         </ul>
       </details>
+
+      {onBack && (
+        <button type="button" className="setup__secondary-btn" onClick={onBack}>
+          戻る
+        </button>
+      )}
     </div>
   )
 }

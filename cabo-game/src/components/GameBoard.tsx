@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { rankLabel } from '../game/deck'
+import { getActingPlayerIndex } from '../game/interaction'
 import type { CoinSession, GameAction, GameState } from '../game/types'
 import Card from './Card'
 import Controls from './Controls'
@@ -13,21 +14,26 @@ interface GameBoardProps {
   state: GameState
   dispatch: React.Dispatch<GameAction>
   coinSession: CoinSession
+  myPlayerIndex?: number | null
+  canControlScore?: boolean
   onNextRound: (newBalances: number[]) => void
   onNewGame: () => void
 }
 
-export default function GameBoard({ state, dispatch, coinSession, onNextRound, onNewGame }: GameBoardProps) {
+export default function GameBoard({ state, dispatch, coinSession, myPlayerIndex = null, canControlScore = true, onNextRound, onNewGame }: GameBoardProps) {
   const topDiscard = state.discard[state.discard.length - 1]
   const activePlayer = state.players[state.currentPlayerIndex]
+  const actingPlayerIndex = getActingPlayerIndex(state)
+  const isMyAction = myPlayerIndex === null || actingPlayerIndex === myPlayerIndex
 
   useEffect(() => {
-    if (state.stage === 'turn-start' && !state.overlay) {
+    if (state.stage === 'turn-start' && !state.overlay && isMyAction) {
       dispatch({ type: 'DRAW_CARD' })
     }
-  }, [state.stage, state.overlay, dispatch])
+  }, [state.stage, state.overlay, isMyAction, dispatch])
 
   const handleCardClick = (playerIndex: number, cardIndex: number) => {
+    if (!isMyAction) return
     dispatch({ type: 'SELECT_CARD', playerIndex, cardIndex })
   }
 
@@ -73,21 +79,31 @@ export default function GameBoard({ state, dispatch, coinSession, onNextRound, o
 
       {state.stage === 'initial-peek' && state.initialPeek && (
         <div className="game-board__peek-banner">
-          <p>
-            {state.players[state.initialPeek.playerIndex].name} さん、自分のカードを2枚タップして確認してください。
-            （他のプレイヤーは画面を見ないようにしましょう）
-          </p>
-          {state.initialPeek.pickedIndices.length >= 2 && (
-            <button type="button" className="btn btn--primary" onClick={() => dispatch({ type: 'CONFIRM_PEEK_DONE' })}>
-              確認完了・次のプレイヤーへ
-            </button>
+          {isMyAction ? (
+            <>
+              <p>
+                {state.players[state.initialPeek.playerIndex].name} さん、自分のカードを2枚タップして確認してください。
+                （他のプレイヤーは画面を見ないようにしましょう）
+              </p>
+              {state.initialPeek.pickedIndices.length >= 2 && (
+                <button type="button" className="btn btn--primary" onClick={() => dispatch({ type: 'CONFIRM_PEEK_DONE' })}>
+                  確認完了・次のプレイヤーへ
+                </button>
+              )}
+            </>
+          ) : (
+            <p>{state.players[state.initialPeek.playerIndex].name} さんがカードを確認しています。お待ちください。</p>
           )}
         </div>
       )}
 
+      {myPlayerIndex !== null && isMyAction && state.stage !== 'initial-peek' && state.stage !== 'round-end' && (
+        <div className="game-board__turn-banner">あなたの番です！</div>
+      )}
+
       <div className="game-board__players">
         {state.players.map((_, index) => (
-          <PlayerArea key={index} state={state} playerIndex={index} onCardClick={handleCardClick} />
+          <PlayerArea key={index} state={state} playerIndex={index} myPlayerIndex={myPlayerIndex} onCardClick={handleCardClick} />
         ))}
       </div>
 
@@ -95,11 +111,12 @@ export default function GameBoard({ state, dispatch, coinSession, onNextRound, o
         <ScoreResult
           state={state}
           coinSession={coinSession}
+          canControl={canControlScore}
           onNextRound={onNextRound}
           onNewGame={onNewGame}
         />
       ) : (
-        <Controls state={state} dispatch={dispatch} />
+        <Controls state={state} dispatch={dispatch} myPlayerIndex={myPlayerIndex} />
       )}
 
       <section className="game-board__log">
@@ -114,7 +131,9 @@ export default function GameBoard({ state, dispatch, coinSession, onNextRound, o
         </ul>
       </section>
 
-      {state.overlay && <RevealOverlay overlay={state.overlay} players={state.players} onDismiss={() => dispatch({ type: 'DISMISS_OVERLAY' })} />}
+      {state.overlay && (myPlayerIndex === null || state.overlay.viewerIndex === null || state.overlay.viewerIndex === myPlayerIndex) && (
+        <RevealOverlay overlay={state.overlay} players={state.players} onDismiss={() => dispatch({ type: 'DISMISS_OVERLAY' })} />
+      )}
 
       {state.matchAttempt && (
         <MatchAttemptModal
