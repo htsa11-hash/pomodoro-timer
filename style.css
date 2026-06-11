@@ -25,8 +25,20 @@ body {
 }
 
 h1 {
-  margin-bottom: 24px;
+  margin-bottom: 8px;
   color: #d35400;
+}
+
+.nav-link {
+  display: inline-block;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #999;
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  text-decoration: underline;
 }
 
 .mode-buttons {
