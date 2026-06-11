@@ -32,11 +32,19 @@ export default function Card({ card, faceDown = false, size = 'medium', highligh
   const content =
     !faceDown && card ? (
       <div className="card__face" style={{ color: SUIT_INFO[card.suit].color }}>
+        <span className="card__corner card__corner--top" aria-hidden="true">
+          {card.rank}
+          <span className="card__corner-suit">{SUIT_INFO[card.suit].symbol}</span>
+        </span>
         <span className="card__rank">{card.rank}</span>
         <span className="card__suit">{SUIT_INFO[card.suit].symbol}</span>
+        <span className="card__corner card__corner--bottom" aria-hidden="true">
+          {card.rank}
+          <span className="card__corner-suit">{SUIT_INFO[card.suit].symbol}</span>
+        </span>
       </div>
     ) : (
-      <div className="card__back-pattern">CABO</div>
+      <div className="card__back-pattern" aria-hidden="true" />
     )
 
   return (

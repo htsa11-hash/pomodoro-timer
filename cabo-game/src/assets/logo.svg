@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 130">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f1dc9a"/>
+      <stop offset="55%" stop-color="#d4af37"/>
+      <stop offset="100%" stop-color="#a9852b"/>
+    </linearGradient>
+    <radialGradient id="navy" cx="50%" cy="35%" r="85%">
+      <stop offset="0%" stop-color="#27407c"/>
+      <stop offset="100%" stop-color="#15203f"/>
+    </radialGradient>
+    <linearGradient id="cream" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fdf9ec"/>
+      <stop offset="100%" stop-color="#f1e7cb"/>
+    </linearGradient>
+  </defs>
+
+  <!-- table shadow -->
+  <ellipse cx="110" cy="113" rx="80" ry="9" fill="#000" opacity="0.35"/>
+
+  <g transform="translate(110 108)">
+    <!-- left card (back) -->
+    <g transform="rotate(-24)">
+      <rect x="-27" y="-86" width="54" height="78" rx="7" fill="url(#navy)" stroke="url(#gold)" stroke-width="2.5"/>
+      <rect x="-21" y="-80" width="42" height="66" rx="4" fill="none" stroke="#d4af37" stroke-width="1" opacity="0.6"/>
+      <path d="M0 -60l9 13-9 13-9-13z" fill="#d4af37" opacity="0.85"/>
+    </g>
+
+    <!-- right card (back) -->
+    <g transform="rotate(24)">
+      <rect x="-27" y="-86" width="54" height="78" rx="7" fill="url(#navy)" stroke="url(#gold)" stroke-width="2.5"/>
+      <rect x="-21" y="-80" width="42" height="66" rx="4" fill="none" stroke="#d4af37" stroke-width="1" opacity="0.6"/>
+      <path d="M0 -60l9 13-9 13-9-13z" fill="#d4af37" opacity="0.85"/>
+    </g>
+
+    <!-- center card (face) -->
+    <g>
+      <rect x="-29" y="-96" width="58" height="84" rx="7" fill="url(#cream)" stroke="url(#gold)" stroke-width="2.5"/>
+      <path d="M0 -75l14 21-14 21-14-21z" fill="#b03040"/>
+      <path d="M0 -68.5l9.7 14.5-9.7 14.5-9.7-14.5z" fill="none" stroke="#fdf9ec" stroke-width="1.4" opacity="0.85"/>
+      <path d="M-20 -88l4 6-4 6-4-6z" fill="#b03040"/>
+      <path d="M20 -32l4 6-4 6-4-6z" fill="#b03040"/>
+    </g>
+  </g>
+
+  <!-- sparkles -->
+  <g fill="#f1dc9a">
+    <path d="M32 34l2.5 6 6 2.5-6 2.5-2.5 6-2.5-6-6-2.5 6-2.5z" opacity="0.9"/>
+    <path d="M186 24l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" opacity="0.85"/>
+    <circle cx="58" cy="16" r="1.8" opacity="0.7"/>
+    <circle cx="168" cy="56" r="1.6" opacity="0.6"/>
+    <circle cx="44" cy="64" r="1.4" opacity="0.55"/>
+  </g>
+</svg>

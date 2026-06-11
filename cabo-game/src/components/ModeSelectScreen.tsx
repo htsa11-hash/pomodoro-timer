@@ -1,4 +1,5 @@
 import { useTranslation } from '../i18n/I18nContext'
+import logoUrl from '../assets/logo.svg'
 import './ModeSelectScreen.css'
 
 interface ModeSelectScreenProps {
@@ -11,6 +12,7 @@ export default function ModeSelectScreen({ onSelectOffline, onSelectOnline }: Mo
 
   return (
     <div className="mode-select">
+      <img className="mode-select__logo" src={logoUrl} alt="" aria-hidden="true" />
       <h1 className="mode-select__title">{t('appTitle')}</h1>
       <p className="mode-select__lead">{t('modeSelectLead')}</p>
 
