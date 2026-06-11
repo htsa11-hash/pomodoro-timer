@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from '../i18n/I18nContext'
+import type { TranslationKey } from '../i18n/translations'
 import type { GameAction } from '../game/types'
 import {
   createRoom as createRoomApi,
@@ -31,12 +33,29 @@ function loadSavedCode(): string | null {
   }
 }
 
+const ERROR_KEYS = new Set<string>([
+  'errorCreateRoomFailed',
+  'errorRoomNotFound',
+  'errorRoomAlreadyStarted',
+  'errorRoomFull',
+  'errorRoomNotFoundOnSubscribe',
+])
+
 export function useRoom() {
+  const { t } = useTranslation()
   const [uid, setUid] = useState<string | null>(null)
   const [code, setCode] = useState<string | null>(loadSavedCode)
   const [room, setRoom] = useState<RoomDoc | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+
+  const translateError = useCallback(
+    (e: unknown): string => {
+      const message = e instanceof Error ? e.message : String(e)
+      return ERROR_KEYS.has(message) ? t(message as TranslationKey) : message
+    },
+    [t],
+  )
 
   const roomRef = useRef<RoomDoc | null>(null)
   useEffect(() => {
@@ -46,21 +65,21 @@ export function useRoom() {
   useEffect(() => {
     ensureSignedIn()
       .then(setUid)
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
-  }, [])
+      .catch((e) => setError(translateError(e)))
+  }, [translateError])
 
   useEffect(() => {
     if (!code) return
     return subscribeRoom(code, (next) => {
       if (!next) {
-        setError('ルームが見つかりませんでした。')
+        setError(t('errorRoomNotFoundOnSubscribe'))
         setCode(null)
         localStorage.removeItem(STORAGE_KEY)
         return
       }
       setRoom(next)
     })
-  }, [code])
+  }, [code, t])
 
   const isHost = !!uid && !!room && room.hostUid === uid
 
@@ -79,12 +98,12 @@ export function useRoom() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify({ code: newCode }))
         setCode(newCode)
       } catch (e) {
-        setError(e instanceof Error ? e.message : String(e))
+        setError(translateError(e))
       } finally {
         setBusy(false)
       }
     },
-    [uid],
+    [uid, translateError],
   )
 
   const joinRoom = useCallback(
@@ -98,12 +117,12 @@ export function useRoom() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify({ code: normalized }))
         setCode(normalized)
       } catch (e) {
-        setError(e instanceof Error ? e.message : String(e))
+        setError(translateError(e))
       } finally {
         setBusy(false)
       }
     },
-    [uid],
+    [uid, translateError],
   )
 
   const startGame = useCallback(

@@ -1,4 +1,4 @@
-import type { GameState } from './types'
+import type { GameState, Message } from './types'
 
 export interface CardInteraction {
   clickable: boolean
@@ -70,19 +70,19 @@ export function getCardInteraction(
 }
 
 /** A short instruction shown to guide the active player through the current stage. */
-export function getStageInstruction(state: GameState): string | null {
+export function getStageInstruction(state: GameState): Message | null {
   const activePlayer = state.players[state.currentPlayerIndex]
   switch (state.stage) {
     case 'drawn':
-      return '自分のカードを1枚タップして交換するか、「そのまま捨てる」を選んでください。'
+      return { key: 'instrDrawnSelect' }
     case 'effect-10-select':
-      return '自分のカードを1枚タップして中身を確認してください。'
+      return { key: 'instrEffect10' }
     case 'effect-11-select':
-      return `${activePlayer?.name ?? ''} さん：相手のカードを1枚タップして確認してください。`
+      return { key: 'instrEffect11', params: { name: activePlayer?.name ?? '' } }
     case 'effect-12-select-own':
-      return '交換に使う自分のカードを1枚タップしてください。'
+      return { key: 'instrEffect12Own' }
     case 'effect-12-select-target':
-      return '交換する相手のカードを1枚タップしてください（中身は見られません）。'
+      return { key: 'instrEffect12Target' }
     default:
       return null
   }

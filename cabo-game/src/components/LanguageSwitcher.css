@@ -1,0 +1,28 @@
+.language-switcher {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.language-switcher__option {
+  border: 1px solid #c7d2fe;
+  background: #fff;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+  cursor: pointer;
+  transition: border-color 0.1s ease, color 0.1s ease, background 0.1s ease;
+}
+
+.language-switcher__option:hover {
+  border-color: #4f46e5;
+  color: #4f46e5;
+}
+
+.language-switcher__option--active {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #fff;
+}

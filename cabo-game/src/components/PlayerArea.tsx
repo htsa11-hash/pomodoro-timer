@@ -1,4 +1,5 @@
 import { getCardInteraction } from '../game/interaction'
+import { useTranslation } from '../i18n/I18nContext'
 import type { GameState } from '../game/types'
 import Card from './Card'
 import './PlayerArea.css'
@@ -11,6 +12,7 @@ interface PlayerAreaProps {
 }
 
 export default function PlayerArea({ state, playerIndex, myPlayerIndex = null, onCardClick }: PlayerAreaProps) {
+  const { t } = useTranslation()
   const player = state.players[playerIndex]
   const isCurrentTurn = state.stage !== 'setup' && state.stage !== 'initial-peek' && state.stage !== 'round-end' && playerIndex === state.currentPlayerIndex
   const isPeeking = state.stage === 'initial-peek' && state.initialPeek?.playerIndex === playerIndex
@@ -21,10 +23,10 @@ export default function PlayerArea({ state, playerIndex, myPlayerIndex = null, o
     <div className={`player-area ${isCurrentTurn || isPeeking ? 'player-area--active' : ''}`}>
       <div className="player-area__header">
         <span className="player-area__name">{player.name}</span>
-        {isMe && <span className="player-area__badge player-area__badge--you">あなた</span>}
-        {(isCurrentTurn || isPeeking) && <span className="player-area__badge player-area__badge--turn">手番</span>}
-        {declaredCabo && <span className="player-area__badge player-area__badge--cabo">Cabo!</span>}
-        <span className="player-area__count">{player.hand.length} 枚</span>
+        {isMe && <span className="player-area__badge player-area__badge--you">{t('you')}</span>}
+        {(isCurrentTurn || isPeeking) && <span className="player-area__badge player-area__badge--turn">{t('yourTurnBadge')}</span>}
+        {declaredCabo && <span className="player-area__badge player-area__badge--cabo">{t('caboBadge')}</span>}
+        <span className="player-area__count">{player.hand.length} {t('cardsUnit')}</span>
       </div>
       <div className="player-area__hand">
         {player.hand.map((card, cardIndex) => {

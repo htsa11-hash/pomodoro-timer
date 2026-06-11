@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
-import { rankLabel } from '../game/deck'
+import { rankLabelKey } from '../game/deck'
 import { getActingPlayerIndex } from '../game/interaction'
+import { useTranslation } from '../i18n/I18nContext'
 import type { CoinSession, GameAction, GameState } from '../game/types'
 import Card from './Card'
 import Controls from './Controls'
@@ -21,6 +22,7 @@ interface GameBoardProps {
 }
 
 export default function GameBoard({ state, dispatch, coinSession, myPlayerIndex = null, canControlScore = true, onNextRound, onNewGame }: GameBoardProps) {
+  const { t, tMessage } = useTranslation()
   const topDiscard = state.discard[state.discard.length - 1]
   const activePlayer = state.players[state.currentPlayerIndex]
   const actingPlayerIndex = getActingPlayerIndex(state)
@@ -43,33 +45,31 @@ export default function GameBoard({ state, dispatch, coinSession, myPlayerIndex 
         <div className="game-board__piles">
           <div className="game-board__pile">
             <Card faceDown size="medium" />
-            <span className="game-board__pile-label">山札（{state.deck.length}枚）</span>
+            <span className="game-board__pile-label">{t('deckPile', { count: state.deck.length })}</span>
           </div>
           <div className="game-board__pile">
             {topDiscard ? (
-              <Card card={topDiscard} size="medium" label={rankLabel(topDiscard.rank)} />
+              <Card card={topDiscard} size="medium" label={rankLabelKey(topDiscard.rank) ? t(rankLabelKey(topDiscard.rank) as 'rank10' | 'rank11' | 'rank12') : String(topDiscard.rank)} />
             ) : (
               <Card faceDown size="medium" />
             )}
-            <span className="game-board__pile-label">捨て札</span>
+            <span className="game-board__pile-label">{t('discardPile')}</span>
           </div>
         </div>
 
         <div className="game-board__turn-info">
           {state.stage === 'initial-peek' && state.initialPeek ? (
             <p>
-              <strong>{state.players[state.initialPeek.playerIndex].name}</strong> さんがカードを確認中
-              （{state.initialPeek.pickedIndices.length} / 2 枚）
+              {t('peekingCards', { name: state.players[state.initialPeek.playerIndex].name, count: state.initialPeek.pickedIndices.length })}
             </p>
           ) : state.stage === 'round-end' ? (
-            <p>ラウンド終了</p>
+            <p>{t('roundEnd')}</p>
           ) : (
             <p>
-              現在の手番：<strong>{activePlayer.name}</strong>
+              {t('currentTurn', { name: activePlayer.name })}
               {state.caboDeclaredBy !== null && (
                 <span className="game-board__cabo-note">
-                  {' '}
-                  ／ {state.players[state.caboDeclaredBy].name} が Cabo 宣言中（残り {state.finalTurnsRemaining} ターン）
+                  {t('caboNote', { name: state.players[state.caboDeclaredBy].name, turns: state.finalTurnsRemaining })}
                 </span>
               )}
             </p>
@@ -82,23 +82,22 @@ export default function GameBoard({ state, dispatch, coinSession, myPlayerIndex 
           {isMyAction ? (
             <>
               <p>
-                {state.players[state.initialPeek.playerIndex].name} さん、自分のカードを2枚タップして確認してください。
-                （他のプレイヤーは画面を見ないようにしましょう）
+                {t('peekInstruction', { name: state.players[state.initialPeek.playerIndex].name })}
               </p>
               {state.initialPeek.pickedIndices.length >= 2 && (
                 <button type="button" className="btn btn--primary" onClick={() => dispatch({ type: 'CONFIRM_PEEK_DONE' })}>
-                  確認完了・次のプレイヤーへ
+                  {t('peekConfirmDone')}
                 </button>
               )}
             </>
           ) : (
-            <p>{state.players[state.initialPeek.playerIndex].name} さんがカードを確認しています。お待ちください。</p>
+            <p>{t('peekWaiting', { name: state.players[state.initialPeek.playerIndex].name })}</p>
           )}
         </div>
       )}
 
       {myPlayerIndex !== null && isMyAction && state.stage !== 'initial-peek' && state.stage !== 'round-end' && (
-        <div className="game-board__turn-banner">あなたの番です！</div>
+        <div className="game-board__turn-banner">{t('yourTurnBanner')}</div>
       )}
 
       <div className="game-board__players">
@@ -120,13 +119,13 @@ export default function GameBoard({ state, dispatch, coinSession, myPlayerIndex 
       )}
 
       <section className="game-board__log">
-        <h3>ログ</h3>
+        <h3>{t('gameLog')}</h3>
         <ul>
           {state.log
             .slice(-6)
             .reverse()
             .map((entry, i) => (
-              <li key={i}>{entry}</li>
+              <li key={i}>{tMessage(entry)}</li>
             ))}
         </ul>
       </section>

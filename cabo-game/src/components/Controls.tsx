@@ -1,5 +1,7 @@
-import { rankLabel } from '../game/deck'
+import { rankParam } from '../game/deck'
 import { getStageInstruction } from '../game/interaction'
+import { useTranslation } from '../i18n/I18nContext'
+import type { TranslationKey } from '../i18n/translations'
 import type { GameAction, GameState } from '../game/types'
 import './Controls.css'
 
@@ -9,13 +11,14 @@ interface ControlsProps {
   myPlayerIndex?: number | null
 }
 
-const EFFECT_DESCRIPTIONS: Record<number, string> = {
-  10: '10（ソタ）：自分のカードを1枚見ることができます。',
-  11: '11（カバロ）：相手のカードを1枚見ることができます。',
-  12: '12（レイ）：自分と相手のカードを1枚ずつ、中身を見ずに交換できます。',
+const EFFECT_DESCRIPTION_KEYS: Record<number, TranslationKey> = {
+  10: 'effect10Description',
+  11: 'effect11Description',
+  12: 'effect12Description',
 }
 
 export default function Controls({ state, dispatch, myPlayerIndex = null }: ControlsProps) {
+  const { t, tMessage } = useTranslation()
   const instruction = getStageInstruction(state)
   const activePlayer = state.players[state.currentPlayerIndex]
   const isMyTurn = myPlayerIndex === null || myPlayerIndex === state.currentPlayerIndex
@@ -32,17 +35,17 @@ export default function Controls({ state, dispatch, myPlayerIndex = null }: Cont
     <div className="controls">
       {state.stage === 'turn-start' && (
         <div className="controls__row">
-          <p className="controls__hint">{activePlayer.name} さんのターンです。カードを引いています…</p>
+          <p className="controls__hint">{t('yourTurnDrawing', { name: activePlayer.name })}</p>
         </div>
       )}
 
       {state.stage === 'drawn' && (
         <div className="controls__row">
-          <p className="controls__hint">{instruction}</p>
+          <p className="controls__hint">{instruction ? tMessage(instruction) : ''}</p>
           {isMyTurn && (
             <>
               <button type="button" className="btn btn--secondary" onClick={() => dispatch({ type: 'DISCARD_DRAWN' })}>
-                そのまま捨てる
+                {t('discardAsIs')}
               </button>
               <button
                 type="button"
@@ -50,7 +53,7 @@ export default function Controls({ state, dispatch, myPlayerIndex = null }: Cont
                 disabled={state.caboDeclaredBy !== null}
                 onClick={() => dispatch({ type: 'DECLARE_CABO' })}
               >
-                Cabo 宣言
+                {t('declareCabo')}
               </button>
             </>
           )}
@@ -60,17 +63,17 @@ export default function Controls({ state, dispatch, myPlayerIndex = null }: Cont
       {state.stage === 'effect-choice' && state.pendingEffectCard && (
         <div className="controls__row">
           <p className="controls__hint">
-            捨てたカードは {rankLabel(state.pendingEffectCard.rank)} です。
+            {t('discardedCardIs', { rank: rankParam(state.pendingEffectCard.rank) })}
             <br />
-            {EFFECT_DESCRIPTIONS[state.pendingEffectCard.rank]}
+            {t(EFFECT_DESCRIPTION_KEYS[state.pendingEffectCard.rank])}
           </p>
           {isMyTurn && (
             <>
               <button type="button" className="btn btn--primary" onClick={() => dispatch({ type: 'USE_EFFECT' })}>
-                効果を使う
+                {t('useEffect')}
               </button>
               <button type="button" className="btn btn--secondary" onClick={() => dispatch({ type: 'SKIP_EFFECT' })}>
-                使わない
+                {t('skipEffect')}
               </button>
             </>
           )}
@@ -82,20 +85,22 @@ export default function Controls({ state, dispatch, myPlayerIndex = null }: Cont
         state.stage === 'effect-12-select-own' ||
         state.stage === 'effect-12-select-target') && (
         <div className="controls__row">
-          <p className="controls__hint">{isMyTurn ? instruction : `${activePlayer.name} さんの操作をお待ちください。`}</p>
+          <p className="controls__hint">
+            {isMyTurn && instruction ? tMessage(instruction) : t('waitingForPlayerAction', { name: activePlayer.name })}
+          </p>
         </div>
       )}
 
       {state.stage === 'turn-done' && (
         <div className="controls__row">
-          <p className="controls__hint">カードを捨てました。マッチを試みるか、ターンを終了してください。</p>
+          <p className="controls__hint">{t('discardedHint')}</p>
           {isMyTurn && (
             <button type="button" className="btn btn--primary" onClick={() => dispatch({ type: 'END_TURN' })}>
-              ターン終了
+              {t('endTurn')}
             </button>
           )}
           <button type="button" className="btn btn--ghost" onClick={() => dispatch({ type: 'OPEN_MATCH_ATTEMPT' })}>
-            捨て札と同じ数字に挑戦する
+            {t('matchAttemptOpen')}
           </button>
         </div>
       )}
@@ -103,7 +108,7 @@ export default function Controls({ state, dispatch, myPlayerIndex = null }: Cont
       {canOpenMatch && (
         <div className="controls__row controls__row--secondary">
           <button type="button" className="btn btn--ghost" onClick={() => dispatch({ type: 'OPEN_MATCH_ATTEMPT' })}>
-            捨て札と同じ数字に挑戦する
+            {t('matchAttemptOpen')}
           </button>
         </div>
       )}

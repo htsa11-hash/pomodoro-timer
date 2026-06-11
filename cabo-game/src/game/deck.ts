@@ -4,24 +4,36 @@ export const SUITS: Suit[] = ['oros', 'copas', 'espadas', 'bastos']
 
 export const RANKS: Rank[] = [1, 2, 3, 4, 5, 6, 7, 10, 11, 12]
 
-export const SUIT_INFO: Record<Suit, { label: string; symbol: string; color: string }> = {
-  oros: { label: 'オロス（硬貨）', symbol: '◆', color: '#caa40b' },
-  copas: { label: 'コパス（聖杯）', symbol: '♥', color: '#c0392b' },
-  espadas: { label: 'エスパダス（剣）', symbol: '♠', color: '#2c3e50' },
-  bastos: { label: 'バストス（棍棒）', symbol: '♣', color: '#1e8449' },
+export const SUIT_INFO: Record<Suit, { labelKey: string; symbol: string; color: string }> = {
+  oros: { labelKey: 'suitOros', symbol: '◆', color: '#caa40b' },
+  copas: { labelKey: 'suitCopas', symbol: '♥', color: '#c0392b' },
+  espadas: { labelKey: 'suitEspadas', symbol: '♠', color: '#2c3e50' },
+  bastos: { labelKey: 'suitBastos', symbol: '♣', color: '#1e8449' },
 }
 
-export function rankLabel(rank: Rank): string {
+/** Translation key for a card rank's display label (10/11/12 have special names). */
+export function rankLabelKey(rank: Rank): string | null {
   switch (rank) {
     case 10:
-      return '10 (ソタ)'
+      return 'rank10'
     case 11:
-      return '11 (カバロ)'
+      return 'rank11'
     case 12:
-      return '12 (レイ)'
+      return 'rank12'
     default:
-      return String(rank)
+      return null
   }
+}
+
+/**
+ * Returns a value suitable for use as a `{rank}`-style interpolation parameter
+ * in a translated message. For special ranks (10/11/12) this is a `rank:<n>`
+ * marker that the i18n interpolator resolves to the translated rank label;
+ * for regular ranks it's just the number as a string.
+ */
+export function rankParam(rank: Rank): string {
+  const key = rankLabelKey(rank)
+  return key ? `rank:${rank}` : String(rank)
 }
 
 export function isSpecialRank(rank: Rank): boolean {

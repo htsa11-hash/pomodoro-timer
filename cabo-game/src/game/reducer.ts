@@ -1,5 +1,5 @@
-import { createDeck, drawFromDeck, isSpecialRank, rankLabel, shuffle } from './deck'
-import type { GameAction, GameState, PlayerState, Stage } from './types'
+import { createDeck, drawFromDeck, isSpecialRank, rankParam, shuffle } from './deck'
+import type { GameAction, GameState, Message, PlayerState, Stage } from './types'
 
 const HAND_SIZE = 4
 const INITIAL_PEEK_COUNT = 2
@@ -50,7 +50,7 @@ function advanceTurn(state: GameState): GameState {
         ...cleared,
         stage: 'round-end',
         finalTurnsRemaining: 0,
-        log: [...cleared.log, 'ラウンド終了！全員のカードを公開します。'],
+        log: [...cleared.log, msg('roundEndLog')],
       }
     }
     return {
@@ -73,8 +73,12 @@ function moveToNextPlayer(state: GameState): GameState {
   return { ...state, stage: 'turn-start', currentPlayerIndex: nextPlayerIndex(state) }
 }
 
-function withLog(state: GameState, message: string): GameState {
+function withLog(state: GameState, message: Message): GameState {
   return { ...state, log: [...state.log, message] }
+}
+
+function msg(key: string, params?: Record<string, string | number>): Message {
+  return params ? { key, params } : { key }
 }
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
@@ -107,8 +111,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         discard: [topCard],
         initialPeek: { playerIndex: 0, pickedIndices: [] },
         log: [
-          'ゲームを開始しました。各プレイヤーは自分のカードを2枚だけ確認できます。',
-          `${players[0].name} さんの番です。スマホ・画面を他の人に見られないようにして確認してください。`,
+          msg('gameStartLog'),
+          msg('initialPeekTurnLog', { name: players[0].name }),
         ],
       }
     }
@@ -124,14 +128,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           stage: 'turn-start',
           initialPeek: null,
           currentPlayerIndex: 0,
-          log: [...state.log, `準備完了！ ${state.players[0].name} さんのターンから開始します。`],
+          log: [...state.log, msg('readyStartLog', { name: state.players[0].name })],
         }
       }
 
       return {
         ...state,
         initialPeek: { playerIndex: next, pickedIndices: [] },
-        log: [...state.log, `${state.players[next].name} さんの番です。画面を他の人に見られないようにして確認してください。`],
+        log: [...state.log, msg('initialPeekTurnLog', { name: state.players[next].name })],
       }
     }
 
@@ -148,13 +152,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         drawnCard: card,
         overlay: {
           viewerIndex: state.currentPlayerIndex,
-          heading: '引いたカード',
-          description: '交換するか、そのまま捨てるか選びましょう。',
+          heading: msg('drawnOverlayHeading'),
+          description: msg('drawnOverlayDescription'),
           cards: [{ card }],
-          confirmLabel: '確認した',
+          confirmLabel: msg('confirmedLabel'),
           then: 'nothing',
         },
-        log: [...state.log, `${player.name} が山札からカードを引きました。`],
+        log: [...state.log, msg('drawCardLog', { name: player.name })],
       }
     }
 
@@ -165,7 +169,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const discard = [...state.discard, card]
       const base = withLog(
         { ...state, discard, drawnCard: null },
-        `${player.name} は引いたカード（${rankLabel(card.rank)}）をそのまま捨てました。`,
+        msg('discardedDrawnLog', { name: player.name, rank: rankParam(card.rank) }),
       )
 
       if (isSpecialRank(card.rank)) {
@@ -186,7 +190,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'SKIP_EFFECT': {
       if (state.stage !== 'effect-choice') return state
-      return readyForTurnDone(withLog(state, '効果を使いませんでした。'))
+      return readyForTurnDone(withLog(state, msg('skippedEffectLog')))
     }
 
     case 'DECLARE_CABO': {
@@ -203,7 +207,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           caboDeclaredBy: state.currentPlayerIndex,
           finalTurnsRemaining: state.players.length - 1,
         },
-        `${player.name} が「Cabo」を宣言しました！ 残り ${state.players.length - 1} 人が最後のターンを行います。`,
+        msg('declaredCaboLog', { name: player.name, count: state.players.length - 1 }),
       )
       return moveToNextPlayer(declared)
     }
@@ -263,9 +267,9 @@ function handleSelectCard(state: GameState, playerIndex: number, cardIndex: numb
         peekHighlights: { ...state.peekHighlights, [playerIndex]: [...prevIndices, cardIndex] },
         overlay: {
           viewerIndex: playerIndex,
-          heading: `${player.name} のカード（位置 ${cardIndex + 1}）`,
+          heading: msg('yourCardLabel', { name: player.name, index: cardIndex + 1 }),
           cards: [{ card }],
-          confirmLabel: '覚えた',
+          confirmLabel: msg('rememberedLabel'),
           then: 'nothing',
         },
       }
@@ -281,7 +285,7 @@ function handleSelectCard(state: GameState, playerIndex: number, cardIndex: numb
 
       const base = withLog(
         { ...state, players, discard, drawnCard: null },
-        `${player.name} は位置 ${cardIndex + 1} のカードと交換し、古いカード（${rankLabel(oldCard.rank)}）を捨てました。`,
+        msg('swappedCardLog', { name: player.name, index: cardIndex + 1, rank: rankParam(oldCard.rank) }),
       )
 
       if (isSpecialRank(oldCard.rank)) {
@@ -300,9 +304,9 @@ function handleSelectCard(state: GameState, playerIndex: number, cardIndex: numb
         peekHighlights: { ...state.peekHighlights, [playerIndex]: [...prevIndices, cardIndex] },
         overlay: {
           viewerIndex: playerIndex,
-          heading: '自分のカードを確認（効果：10）',
-          cards: [{ card, caption: `位置 ${cardIndex + 1}` }],
-          confirmLabel: '覚えた',
+          heading: msg('peekedOwnOverlayHeading'),
+          cards: [{ card, caption: msg('peekedOwnCardCaption', { index: cardIndex + 1 }) }],
+          confirmLabel: msg('rememberedLabel'),
           then: 'advance-turn',
         },
       }
@@ -317,10 +321,10 @@ function handleSelectCard(state: GameState, playerIndex: number, cardIndex: numb
         ...state,
         overlay: {
           viewerIndex: state.currentPlayerIndex,
-          heading: `${target.name} のカードを確認（効果：11）`,
-          description: `${viewer.name} だけがこのカードを見ることができます。`,
-          cards: [{ card, caption: `${target.name} の位置 ${cardIndex + 1}` }],
-          confirmLabel: '覚えた',
+          heading: msg('peekedOpponentOverlayHeading', { name: target.name }),
+          description: msg('peekedOpponentOverlayDescription', { name: viewer.name }),
+          cards: [{ card, caption: msg('peekedOpponentCardCaption', { name: target.name, index: cardIndex + 1 }) }],
+          confirmLabel: msg('rememberedLabel'),
           then: 'advance-turn',
         },
       }
@@ -346,7 +350,7 @@ function handleSelectCard(state: GameState, playerIndex: number, cardIndex: numb
       them.hand[cardIndex] = tmp
 
       const done = readyForTurnDone({ ...state, players, pendingSelection: null })
-      return withLog(done, `${me.name} は ${them.name} と中身を見ずにカードを交換しました（効果：12）。`)
+      return withLog(done, msg('swappedBlindLog', { name: me.name, target: them.name }))
     }
 
     default:
@@ -376,13 +380,13 @@ function resolveMatchAttempt(state: GameState, cardIndex: number): GameState {
   if (success) {
     player.hand.splice(cardIndex, 1)
     discard = [...discard, card]
-    log = [...log, `${player.name} は捨て札（${rankLabel(top.rank)}）と一致するカードを当てて捨てました！ 手札が ${player.hand.length} 枚になりました。`]
+    log = [...log, msg('matchSuccessLog', { name: player.name, rank: rankParam(top.rank), count: player.hand.length })]
   } else {
     const drawn = drawFromDeck(deck, discard)
     deck = drawn.deck
     discard = drawn.discard
     player.hand.push(drawn.card)
-    log = [...log, `${player.name} のカードは一致しませんでした。ペナルティで山札からカードを1枚引きました（手札 ${player.hand.length} 枚）。`]
+    log = [...log, msg('matchFailLog', { name: player.name, count: player.hand.length })]
   }
 
   return {
@@ -394,12 +398,12 @@ function resolveMatchAttempt(state: GameState, cardIndex: number): GameState {
     log,
     overlay: {
       viewerIndex: null,
-      heading: success ? '一致！カードを捨てました' : '残念、一致しませんでした',
+      heading: msg(success ? 'matchSuccessHeading' : 'matchFailHeading'),
       description: success
-        ? `${player.name} のカードは ${rankLabel(card.rank)} で、捨て札（${rankLabel(top.rank)}）と一致しました。`
-        : `${player.name} のカードは ${rankLabel(card.rank)} でした。捨て札（${rankLabel(top.rank)}）とは一致せず、ペナルティでカードが1枚増えました。`,
-      cards: [{ card, caption: player.name }],
-      confirmLabel: '閉じる',
+        ? msg('matchSuccessDescription', { name: player.name, rank: rankParam(card.rank), topRank: rankParam(top.rank) })
+        : msg('matchFailDescription', { name: player.name, rank: rankParam(card.rank), topRank: rankParam(top.rank) }),
+      cards: [{ card, caption: { key: 'plainName', params: { name: player.name } } }],
+      confirmLabel: msg('closeLabel'),
       then: 'nothing',
     },
   }

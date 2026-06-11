@@ -27,18 +27,24 @@ export type Stage =
   | 'turn-done'
   | 'round-end'
 
+/** A translatable message: a translation key plus optional interpolation params. */
+export interface Message {
+  key: string
+  params?: Record<string, string | number>
+}
+
 export interface OverlayCard {
   card: CardData
-  caption?: string
+  caption?: Message
 }
 
 export interface Overlay {
   /** The player who is allowed to look at this overlay. null = visible to everyone (public reveal). */
   viewerIndex: number | null
-  heading: string
-  description?: string
+  heading: Message
+  description?: Message
   cards: OverlayCard[]
-  confirmLabel: string
+  confirmLabel: Message
   /** What should happen once the overlay is dismissed. */
   then: 'advance-turn' | 'nothing'
 }
@@ -69,7 +75,7 @@ export interface GameState {
   matchAttempt: MatchAttemptState | null
   /** playerIndex → card indices the player has peeked this turn (cleared when their turn ends) */
   peekHighlights: Record<number, number[]>
-  log: string[]
+  log: Message[]
 }
 
 export interface CoinSession {

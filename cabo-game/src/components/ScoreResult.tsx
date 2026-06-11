@@ -1,5 +1,7 @@
-import { rankLabel, SUIT_INFO } from '../game/deck'
+import { rankLabelKey, SUIT_INFO } from '../game/deck'
 import { totalScore } from '../game/reducer'
+import { useTranslation } from '../i18n/I18nContext'
+import type { TranslationKey } from '../i18n/translations'
 import type { CoinSession, GameState } from '../game/types'
 import './ScoreResult.css'
 
@@ -31,6 +33,15 @@ function computeCoinTransfers(
 }
 
 export default function ScoreResult({ state, coinSession, canControl = true, onNextRound, onNewGame }: ScoreResultProps) {
+  const { t } = useTranslation()
+  const rankLabel = (rank: number) => {
+    const key = rankLabelKey(rank as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 10 | 11 | 12)
+    return key ? t(key as TranslationKey) : String(rank)
+  }
+  const formatCoins = (amount: number) => {
+    const unit = t('coinUnit')
+    return unit ? `${amount} ${unit}` : String(amount)
+  }
   const ranked = state.players
     .map((player) => ({ player, total: totalScore(player) }))
     .sort((a, b) => a.total - b.total)
@@ -43,14 +54,15 @@ export default function ScoreResult({ state, coinSession, canControl = true, onN
 
   return (
     <div className="score-result">
-      <h2 className="score-result__title">ラウンド終了！結果発表</h2>
+      <h2 className="score-result__title">{t('roundEndTitle')}</h2>
       <p className="score-result__winner">
-        {winners.length > 1 ? `引き分け：${winners.join(' と ')}` : `優勝：${winners[0]} さん！`}（合計 {lowest} 点）
+        {winners.length > 1 ? t('drawResult', { names: winners.join(' / ') }) : t('winnerResult', { name: winners[0] })}
+        {t('pointsTotal', { points: lowest })}
       </p>
 
       {hasBet && (
         <div className="score-result__coin-summary">
-          <span className="score-result__coin-pot">ポット：{coinSession.betAmount * state.players.length} 枚</span>
+          <span className="score-result__coin-pot">{t('pot', { amount: formatCoins(coinSession.betAmount * state.players.length) })}</span>
         </div>
       )}
 
@@ -61,9 +73,9 @@ export default function ScoreResult({ state, coinSession, canControl = true, onN
           return (
             <div key={player.id} className={`score-result__row ${rank === 0 ? 'score-result__row--winner' : ''}`}>
               <div className="score-result__row-header">
-                <span className="score-result__rank">{rank + 1}位</span>
+                <span className="score-result__rank">{t('rankLabel', { rank: rank + 1 })}</span>
                 <span className="score-result__name">{player.name}</span>
-                <span className="score-result__total">{total} 点</span>
+                <span className="score-result__total">{total} {t('pointsUnit')}</span>
               </div>
               <div className="score-result__cards">
                 {player.hand.map((card) => (
@@ -77,9 +89,9 @@ export default function ScoreResult({ state, coinSession, canControl = true, onN
               {hasBet && (
                 <div className="score-result__coin-row">
                   <span className={`score-result__coin-change ${change >= 0 ? 'score-result__coin-change--positive' : 'score-result__coin-change--negative'}`}>
-                    {change >= 0 ? `+${change}` : `${change}`} 枚
+                    {change >= 0 ? formatCoins(change).replace(/^/, '+') : formatCoins(change)}
                   </span>
-                  <span className="score-result__coin-balance">{newBal} 枚</span>
+                  <span className="score-result__coin-balance">{formatCoins(newBal)}</span>
                 </div>
               )}
             </div>
@@ -90,14 +102,14 @@ export default function ScoreResult({ state, coinSession, canControl = true, onN
       {canControl ? (
         <div className="score-result__actions">
           <button type="button" className="btn btn--primary" onClick={() => onNextRound(newBalances)}>
-            次のラウンドへ
+            {t('nextRound')}
           </button>
           <button type="button" className="btn btn--secondary" onClick={onNewGame}>
-            新しいゲーム
+            {t('newGame')}
           </button>
         </div>
       ) : (
-        <p className="score-result__waiting">ホストが次のアクションを選択しています…</p>
+        <p className="score-result__waiting">{t('waitingForHostAction')}</p>
       )}
     </div>
   )

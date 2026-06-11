@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from '../i18n/I18nContext'
 import type { CoinSession } from '../game/types'
 import './SetupScreen.css'
 
@@ -15,11 +16,13 @@ const DEFAULT_STARTING_COINS = 1000
 const DEFAULT_BET = 100
 
 export default function SetupScreen({ onStart, existingSession, onNewGame, onBack }: SetupScreenProps) {
+  const { t } = useTranslation()
+  const defaultPlayerName = (n: number) => `${t('player')}${n}`
   const [count, setCount] = useState(existingSession ? existingSession.playerNames.length : 4)
   const [names, setNames] = useState<string[]>(
     existingSession
-      ? [...existingSession.playerNames, ...Array.from({ length: MAX_PLAYERS - existingSession.playerNames.length }, (_, i) => `プレイヤー${existingSession.playerNames.length + i + 1}`)]
-      : Array.from({ length: MAX_PLAYERS }, (_, i) => `プレイヤー${i + 1}`),
+      ? [...existingSession.playerNames, ...Array.from({ length: MAX_PLAYERS - existingSession.playerNames.length }, (_, i) => defaultPlayerName(existingSession.playerNames.length + i + 1))]
+      : Array.from({ length: MAX_PLAYERS }, (_, i) => defaultPlayerName(i + 1)),
   )
   const [startingCoins, setStartingCoins] = useState(DEFAULT_STARTING_COINS)
   const [betAmount, setBetAmount] = useState(existingSession ? existingSession.betAmount : DEFAULT_BET)
@@ -29,7 +32,7 @@ export default function SetupScreen({ onStart, existingSession, onNewGame, onBac
   }
 
   const handleStart = () => {
-    const finalNames = names.slice(0, count).map((name, i) => name.trim() || `プレイヤー${i + 1}`)
+    const finalNames = names.slice(0, count).map((name, i) => name.trim() || defaultPlayerName(i + 1))
     onStart(finalNames, startingCoins, Math.max(0, betAmount))
   }
 
@@ -40,25 +43,25 @@ export default function SetupScreen({ onStart, existingSession, onNewGame, onBac
   if (existingSession) {
     return (
       <div className="setup">
-        <h1 className="setup__title">🃏 次のラウンド</h1>
-        <p className="setup__lead">コインを賭けて次のラウンドを開始しましょう。</p>
+        <h1 className="setup__title">{t('nextRoundTitle')}</h1>
+        <p className="setup__lead">{t('nextRoundLead')}</p>
 
         <div className="setup__coin-table">
           <div className="setup__coin-header">
-            <span>プレイヤー</span>
-            <span>コイン残高</span>
+            <span>{t('player')}</span>
+            <span>{t('coinBalance')}</span>
           </div>
           {existingSession.playerNames.map((name, i) => (
             <div key={i} className={`setup__coin-row ${existingSession.balances[i] <= 0 ? 'setup__coin-row--broke' : ''}`}>
               <span className="setup__coin-name">{name}</span>
-              <span className="setup__coin-balance">{existingSession.balances[i].toLocaleString()} 枚</span>
-              {existingSession.balances[i] <= 0 && <span className="setup__coin-tag">コイン切れ</span>}
+              <span className="setup__coin-balance">{existingSession.balances[i].toLocaleString()} {t('coinUnit')}</span>
+              {existingSession.balances[i] <= 0 && <span className="setup__coin-tag">{t('outOfCoins')}</span>}
             </div>
           ))}
         </div>
 
         <div className="setup__field">
-          <label htmlFor="bet-amount">ベット額（1ラウンドあたり）</label>
+          <label htmlFor="bet-amount">{t('betPerRound')}</label>
           <div className="setup__bet-row">
             <input
               id="bet-amount"
@@ -69,18 +72,18 @@ export default function SetupScreen({ onStart, existingSession, onNewGame, onBac
               onChange={(e) => setBetAmount(Number(e.target.value))}
               className="setup__bet-input"
             />
-            <span className="setup__bet-unit">枚</span>
+            <span className="setup__bet-unit">{t('coinUnit')}</span>
           </div>
           {!betValid && (
-            <p className="setup__bet-warn">コインが足りないプレイヤーがいます（最大 {maxBet} 枚）</p>
+            <p className="setup__bet-warn">{t('betWarnInsufficientCoins', { max: maxBet })}</p>
           )}
         </div>
 
         <button type="button" className="setup__start-btn" onClick={handleStart} disabled={!betValid}>
-          ゲーム開始
+          {t('startGame')}
         </button>
         <button type="button" className="setup__secondary-btn" onClick={onNewGame}>
-          新しいゲームを始める
+          {t('startNewGame')}
         </button>
       </div>
     )
@@ -88,15 +91,18 @@ export default function SetupScreen({ onStart, existingSession, onNewGame, onBac
 
   return (
     <div className="setup">
-      <h1 className="setup__title">🃏 Cabo（カボ）</h1>
+      <h1 className="setup__title">{t('appTitle')}</h1>
       <p className="setup__lead">
-        スペイントランプ40枚を使った、手札の合計点をできるだけ少なくするカードゲームです。
-        <br />
-        コインを賭けて対戦！勝者が全員のベット分を獲得します。
+        {t('setupLead').split('\n').map((line, i, arr) => (
+          <span key={i}>
+            {line}
+            {i < arr.length - 1 && <br />}
+          </span>
+        ))}
       </p>
 
       <div className="setup__field">
-        <label htmlFor="player-count">プレイ人数</label>
+        <label htmlFor="player-count">{t('playerCount')}</label>
         <div className="setup__count-buttons">
           {Array.from({ length: MAX_PLAYERS - MIN_PLAYERS + 1 }, (_, i) => MIN_PLAYERS + i).map((n) => (
             <button
@@ -105,14 +111,14 @@ export default function SetupScreen({ onStart, existingSession, onNewGame, onBac
               className={`setup__count-btn ${count === n ? 'setup__count-btn--active' : ''}`}
               onClick={() => setCount(n)}
             >
-              {n}人
+              {n}{t('playerCountUnit')}
             </button>
           ))}
         </div>
       </div>
 
       <div className="setup__field">
-        <label>プレイヤー名</label>
+        <label>{t('playerNames')}</label>
         <div className="setup__names">
           {names.slice(0, count).map((name, i) => (
             <input
@@ -120,7 +126,7 @@ export default function SetupScreen({ onStart, existingSession, onNewGame, onBac
               type="text"
               value={name}
               maxLength={12}
-              placeholder={`プレイヤー${i + 1}`}
+              placeholder={defaultPlayerName(i + 1)}
               onChange={(e) => updateName(i, e.target.value)}
             />
           ))}
@@ -128,7 +134,7 @@ export default function SetupScreen({ onStart, existingSession, onNewGame, onBac
       </div>
 
       <div className="setup__field">
-        <label htmlFor="starting-coins">初期コイン（1人あたり）</label>
+        <label htmlFor="starting-coins">{t('startingCoinsPerPlayer')}</label>
         <div className="setup__bet-row">
           <input
             id="starting-coins"
@@ -139,12 +145,12 @@ export default function SetupScreen({ onStart, existingSession, onNewGame, onBac
             onChange={(e) => setStartingCoins(Number(e.target.value))}
             className="setup__bet-input"
           />
-          <span className="setup__bet-unit">枚</span>
+          <span className="setup__bet-unit">{t('coinUnit')}</span>
         </div>
       </div>
 
       <div className="setup__field">
-        <label htmlFor="bet-amount">ベット額（1ラウンドあたり）</label>
+        <label htmlFor="bet-amount">{t('betPerRound')}</label>
         <div className="setup__bet-row">
           <input
             id="bet-amount"
@@ -155,33 +161,33 @@ export default function SetupScreen({ onStart, existingSession, onNewGame, onBac
             onChange={(e) => setBetAmount(Number(e.target.value))}
             className="setup__bet-input"
           />
-          <span className="setup__bet-unit">枚</span>
+          <span className="setup__bet-unit">{t('coinUnit')}</span>
         </div>
         {betAmount > startingCoins && (
-          <p className="setup__bet-warn">ベット額が初期コインを超えています</p>
+          <p className="setup__bet-warn">{t('betWarnExceedsStarting')}</p>
         )}
       </div>
 
       <button type="button" className="setup__start-btn" onClick={handleStart}>
-        ゲーム開始
+        {t('startGame')}
       </button>
 
       <details className="setup__rules">
-        <summary>遊び方をみる</summary>
+        <summary>{t('howToPlay')}</summary>
         <ul>
-          <li>各プレイヤーに4枚のカードが裏向きで配られ、最初に2枚だけ見ることができます。</li>
-          <li>自分の番では山札から1枚引き、手札と交換するかそのまま捨てます。</li>
-          <li>交換した場合、もとのカードは捨て札になります。</li>
-          <li>10・11・12を捨てると特殊効果（カードを見る／交換する）を使えます。</li>
-          <li>捨て札と同じ数字の手札があると思ったら公開して捨てるチャンスがあります（成功で手札が減り、失敗するとペナルティでカードが増えます）。</li>
-          <li>「Cabo」を宣言すると、他のプレイヤーが1回ずつ行動した後にラウンドが終了し、手札の合計点が最も少ない人の勝ちです。</li>
-          <li>勝者は全プレイヤーのベット分のコインを獲得します。引き分けの場合は山分けです。</li>
+          <li>{t('rule1')}</li>
+          <li>{t('rule2')}</li>
+          <li>{t('rule3')}</li>
+          <li>{t('rule4')}</li>
+          <li>{t('rule5')}</li>
+          <li>{t('rule6')}</li>
+          <li>{t('rule7')}</li>
         </ul>
       </details>
 
       {onBack && (
         <button type="button" className="setup__secondary-btn" onClick={onBack}>
-          戻る
+          {t('back')}
         </button>
       )}
     </div>

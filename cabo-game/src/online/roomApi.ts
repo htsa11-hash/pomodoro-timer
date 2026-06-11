@@ -67,14 +67,14 @@ export async function createRoom(uid: string, name: string): Promise<string> {
     await setDoc(ref, room)
     return code
   }
-  throw new Error('ルームの作成に失敗しました。もう一度お試しください。')
+  throw new Error('errorCreateRoomFailed')
 }
 
 export async function joinRoom(code: string, uid: string, name: string): Promise<void> {
   const ref = roomRef(code)
   await runTransaction(db, async (tx) => {
     const snap = await tx.get(ref)
-    if (!snap.exists()) throw new Error('ルームが見つかりません。コードを確認してください。')
+    if (!snap.exists()) throw new Error('errorRoomNotFound')
     const room = snap.data() as RoomDoc
     const slots = [...room.playerSlots]
 
@@ -86,10 +86,10 @@ export async function joinRoom(code: string, uid: string, name: string): Promise
     }
 
     if (room.status !== 'lobby') {
-      throw new Error('このルームはすでにゲームが始まっています。')
+      throw new Error('errorRoomAlreadyStarted')
     }
     if (slots.length >= room.maxPlayers) {
-      throw new Error('このルームは満員です。')
+      throw new Error('errorRoomFull')
     }
     slots.push({ uid, name })
     tx.update(ref, { playerSlots: slots })

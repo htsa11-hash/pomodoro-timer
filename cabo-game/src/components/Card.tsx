@@ -1,4 +1,6 @@
 import { SUIT_INFO } from '../game/deck'
+import { useTranslation } from '../i18n/I18nContext'
+import type { TranslationKey } from '../i18n/translations'
 import type { CardData } from '../game/types'
 import './Card.css'
 
@@ -14,6 +16,7 @@ interface CardProps {
 }
 
 export default function Card({ card, faceDown = false, size = 'medium', highlight = false, peeked = false, disabled = false, label, onClick }: CardProps) {
+  const { t } = useTranslation()
   const classNames = [
     'card',
     `card--${size}`,
@@ -43,7 +46,7 @@ export default function Card({ card, faceDown = false, size = 'medium', highligh
         className={classNames}
         onClick={onClick}
         disabled={!onClick || disabled}
-        aria-label={label ?? (card ? `${card.rank} ${SUIT_INFO[card.suit].label}` : 'カード')}
+        aria-label={label ?? (card ? `${card.rank} ${t(SUIT_INFO[card.suit].labelKey as TranslationKey)}` : t('cardAriaLabel'))}
       >
         {content}
       </button>

@@ -1,3 +1,5 @@
+import { rankLabelKey } from '../game/deck'
+import { useTranslation } from '../i18n/I18nContext'
 import type { GameState } from '../game/types'
 import './MatchAttemptModal.css'
 
@@ -9,17 +11,19 @@ interface MatchAttemptModalProps {
 }
 
 export default function MatchAttemptModal({ state, onSelectPlayer, onSelectCard, onCancel }: MatchAttemptModalProps) {
+  const { t } = useTranslation()
   const attempt = state.matchAttempt
   if (!attempt) return null
 
   const top = state.discard[state.discard.length - 1]
+  const topRankLabel = top ? (rankLabelKey(top.rank) ? t(rankLabelKey(top.rank) as 'rank10' | 'rank11' | 'rank12') : String(top.rank)) : '—'
 
   return (
     <div className="overlay-backdrop">
       <div className="match-modal">
-        <h3 className="match-modal__heading">捨て札と同じ数字に挑戦</h3>
+        <h3 className="match-modal__heading">{t('matchAttemptTitle')}</h3>
         <p className="match-modal__description">
-          捨て札の一番上は <strong>{top ? top.rank : '—'}</strong> です。同じ数字を持っていると思うプレイヤーを選んでください。
+          {t('matchAttemptDescription', { rank: topRankLabel })}
         </p>
 
         {attempt.step === 'choose-player' && (
@@ -32,7 +36,7 @@ export default function MatchAttemptModal({ state, onSelectPlayer, onSelectCard,
                 disabled={player.hand.length === 0}
                 onClick={() => onSelectPlayer(index)}
               >
-                {player.name}（{player.hand.length} 枚）
+                {t('matchAttemptPlayerOption', { name: player.name, count: player.hand.length })}
               </button>
             ))}
           </div>
@@ -41,12 +45,12 @@ export default function MatchAttemptModal({ state, onSelectPlayer, onSelectCard,
         {attempt.step === 'choose-card' && attempt.playerIndex !== null && (
           <div className="match-modal__list">
             <p className="match-modal__sub">
-              {state.players[attempt.playerIndex].name} のどのカードを公開して捨てますか？
+              {t('matchAttemptChooseCard', { name: state.players[attempt.playerIndex].name })}
             </p>
             <div className="match-modal__cards">
               {state.players[attempt.playerIndex].hand.map((_, cardIndex) => (
                 <button key={cardIndex} type="button" className="btn btn--secondary" onClick={() => onSelectCard(cardIndex)}>
-                  位置 {cardIndex + 1}
+                  {t('positionLabel', { index: cardIndex + 1 })}
                 </button>
               ))}
             </div>
@@ -54,7 +58,7 @@ export default function MatchAttemptModal({ state, onSelectPlayer, onSelectCard,
         )}
 
         <button type="button" className="btn btn--ghost" onClick={onCancel}>
-          キャンセル
+          {t('cancel')}
         </button>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from '../i18n/I18nContext'
 import './OnlineHomeScreen.css'
 
 interface OnlineHomeScreenProps {
@@ -10,6 +11,7 @@ interface OnlineHomeScreenProps {
 }
 
 export default function OnlineHomeScreen({ busy, error, onCreate, onJoin, onBack }: OnlineHomeScreenProps) {
+  const { t } = useTranslation()
   const [name, setName] = useState('')
   const [joinCode, setJoinCode] = useState('')
 
@@ -17,17 +19,17 @@ export default function OnlineHomeScreen({ busy, error, onCreate, onJoin, onBack
 
   return (
     <div className="online-home">
-      <h1 className="online-home__title">🌐 オンライン対戦</h1>
-      <p className="online-home__lead">同じルームコードを使って、別々の端末で対戦できます。</p>
+      <h1 className="online-home__title">{t('onlineHomeTitle')}</h1>
+      <p className="online-home__lead">{t('onlineHomeLead')}</p>
 
       <div className="online-home__field">
-        <label htmlFor="online-name">あなたの名前</label>
+        <label htmlFor="online-name">{t('yourName')}</label>
         <input
           id="online-name"
           type="text"
           value={name}
           maxLength={12}
-          placeholder="プレイヤー名"
+          placeholder={t('playerNamePlaceholder')}
           onChange={(e) => setName(e.target.value)}
         />
       </div>
@@ -41,21 +43,21 @@ export default function OnlineHomeScreen({ busy, error, onCreate, onJoin, onBack
           disabled={busy || !trimmedName}
           onClick={() => onCreate(trimmedName)}
         >
-          ルームを作成する
+          {t('createRoom')}
         </button>
       </div>
 
-      <div className="online-home__divider">または</div>
+      <div className="online-home__divider">{t('or')}</div>
 
       <div className="online-home__section">
-        <label htmlFor="join-code">ルームコード</label>
+        <label htmlFor="join-code">{t('roomCode')}</label>
         <div className="online-home__join-row">
           <input
             id="join-code"
             type="text"
             value={joinCode}
             maxLength={4}
-            placeholder="例: A1B2"
+            placeholder={t('roomCodePlaceholder')}
             onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
             className="online-home__code-input"
           />
@@ -65,13 +67,13 @@ export default function OnlineHomeScreen({ busy, error, onCreate, onJoin, onBack
             disabled={busy || !trimmedName || joinCode.trim().length === 0}
             onClick={() => onJoin(joinCode, trimmedName)}
           >
-            参加する
+            {t('join')}
           </button>
         </div>
       </div>
 
       <button type="button" className="btn btn--ghost" onClick={onBack}>
-        戻る
+        {t('back')}
       </button>
     </div>
   )
