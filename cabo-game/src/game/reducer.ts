@@ -364,29 +364,59 @@ function resolveMatchAttempt(state: GameState, cardIndex: number): GameState {
   }
   if (state.discard.length === 0) return { ...state, matchAttempt: null }
 
-  const playerIndex = state.matchAttempt.playerIndex
+  // Only the current player may initiate a match attempt (enforced in the UI),
+  // so `currentPlayerIndex` is always the caller.
+  const callerIndex = state.currentPlayerIndex
+  const targetIndex = state.matchAttempt.playerIndex
   const players = clonePlayers(state.players)
-  const player = players[playerIndex]
-  if (cardIndex < 0 || cardIndex >= player.hand.length) return state
+  const caller = players[callerIndex]
+  const target = players[targetIndex]
+  if (cardIndex < 0 || cardIndex >= target.hand.length) return state
 
-  const card = player.hand[cardIndex]
+  const card = target.hand[cardIndex]
   const top = state.discard[state.discard.length - 1]
   const success = card.rank === top.rank
+  const isOwnCard = targetIndex === callerIndex
 
+  // The targeted card always leaves the hand and stays on the discard pile,
+  // whether or not it actually matched the top card.
+  target.hand.splice(cardIndex, 1)
   let deck = state.deck
-  let discard = state.discard
+  let discard = [...state.discard, card]
   let log = state.log
 
-  if (success) {
-    player.hand.splice(cardIndex, 1)
-    discard = [...discard, card]
-    log = [...log, msg('matchSuccessLog', { name: player.name, rank: rankParam(top.rank), count: player.hand.length })]
+  // The removed card shifts every later index in this hand, so any
+  // previously-remembered peek positions for it are no longer valid.
+  const peekHighlights = { ...state.peekHighlights }
+  delete peekHighlights[targetIndex]
+
+  if (success && !isOwnCard) {
+    // Correctly called out an opponent's matching card: it's discarded, and
+    // the opponent draws 2 replacement cards as a penalty.
+    for (let i = 0; i < 2; i++) {
+      const drawn = drawFromDeck(deck, discard)
+      deck = drawn.deck
+      discard = drawn.discard
+      target.hand.push(drawn.card)
+    }
+    log = [
+      ...log,
+      msg('matchSuccessOpponentLog', { name: caller.name, target: target.name, rank: rankParam(card.rank), count: target.hand.length }),
+    ]
+  } else if (success) {
+    log = [...log, msg('matchSuccessLog', { name: target.name, rank: rankParam(top.rank), count: target.hand.length })]
   } else {
-    const drawn = drawFromDeck(deck, discard)
-    deck = drawn.deck
-    discard = drawn.discard
-    player.hand.push(drawn.card)
-    log = [...log, msg('matchFailLog', { name: player.name, count: player.hand.length })]
+    // No match: the card stays discarded regardless, and the caller draws 2 penalty cards.
+    for (let i = 0; i < 2; i++) {
+      const drawn = drawFromDeck(deck, discard)
+      deck = drawn.deck
+      discard = drawn.discard
+      caller.hand.push(drawn.card)
+    }
+    log = [
+      ...log,
+      msg('matchFailLog', { name: caller.name, target: target.name, rank: rankParam(card.rank), topRank: rankParam(top.rank), count: caller.hand.length }),
+    ]
   }
 
   return {
@@ -395,14 +425,17 @@ function resolveMatchAttempt(state: GameState, cardIndex: number): GameState {
     deck,
     discard,
     matchAttempt: null,
+    peekHighlights,
     log,
     overlay: {
       viewerIndex: null,
       heading: msg(success ? 'matchSuccessHeading' : 'matchFailHeading'),
       description: success
-        ? msg('matchSuccessDescription', { name: player.name, rank: rankParam(card.rank), topRank: rankParam(top.rank) })
-        : msg('matchFailDescription', { name: player.name, rank: rankParam(card.rank), topRank: rankParam(top.rank) }),
-      cards: [{ card, caption: { key: 'plainName', params: { name: player.name } } }],
+        ? (isOwnCard
+            ? msg('matchSuccessDescription', { name: target.name, rank: rankParam(card.rank), topRank: rankParam(top.rank) })
+            : msg('matchSuccessOpponentDescription', { name: caller.name, target: target.name, rank: rankParam(card.rank), topRank: rankParam(top.rank) }))
+        : msg('matchFailDescription', { name: caller.name, target: target.name, rank: rankParam(card.rank), topRank: rankParam(top.rank) }),
+      cards: [{ card, caption: { key: 'plainName', params: { name: target.name } } }],
       confirmLabel: msg('closeLabel'),
       then: 'nothing',
     },

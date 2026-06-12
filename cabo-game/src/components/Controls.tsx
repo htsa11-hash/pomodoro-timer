@@ -23,6 +23,7 @@ export default function Controls({ state, dispatch, myPlayerIndex = null }: Cont
   const activePlayer = state.players[state.currentPlayerIndex]
   const isMyTurn = myPlayerIndex === null || myPlayerIndex === state.currentPlayerIndex
   const canOpenMatch =
+    isMyTurn &&
     state.discard.length > 0 &&
     !state.overlay &&
     !state.matchAttempt &&
@@ -41,7 +42,9 @@ export default function Controls({ state, dispatch, myPlayerIndex = null }: Cont
 
       {state.stage === 'drawn' && (
         <div className="controls__row">
-          <p className="controls__hint">{instruction ? tMessage(instruction) : ''}</p>
+          <p className="controls__hint">
+            {isMyTurn ? (instruction ? tMessage(instruction) : '') : t('waitingForPlayerAction', { name: activePlayer.name })}
+          </p>
           {isMyTurn && (
             <>
               <button type="button" className="btn btn--secondary" onClick={() => dispatch({ type: 'DISCARD_DRAWN' })}>
@@ -93,15 +96,19 @@ export default function Controls({ state, dispatch, myPlayerIndex = null }: Cont
 
       {state.stage === 'turn-done' && (
         <div className="controls__row">
-          <p className="controls__hint">{t('discardedHint')}</p>
+          <p className="controls__hint">
+            {isMyTurn ? t('discardedHint') : t('waitingForPlayerAction', { name: activePlayer.name })}
+          </p>
           {isMyTurn && (
             <button type="button" className="btn btn--primary" onClick={() => dispatch({ type: 'END_TURN' })}>
               {t('endTurn')}
             </button>
           )}
-          <button type="button" className="btn btn--ghost" onClick={() => dispatch({ type: 'OPEN_MATCH_ATTEMPT' })}>
-            {t('matchAttemptOpen')}
-          </button>
+          {isMyTurn && (
+            <button type="button" className="btn btn--ghost" onClick={() => dispatch({ type: 'OPEN_MATCH_ATTEMPT' })}>
+              {t('matchAttemptOpen')}
+            </button>
+          )}
         </div>
       )}
 

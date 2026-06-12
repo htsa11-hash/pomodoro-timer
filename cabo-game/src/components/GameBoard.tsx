@@ -134,7 +134,7 @@ export default function GameBoard({ state, dispatch, coinSession, myPlayerIndex 
         <RevealOverlay overlay={state.overlay} players={state.players} onDismiss={() => dispatch({ type: 'DISMISS_OVERLAY' })} />
       )}
 
-      {state.matchAttempt && (
+      {state.matchAttempt && (myPlayerIndex === null || myPlayerIndex === state.currentPlayerIndex) && (
         <MatchAttemptModal
           state={state}
           onSelectPlayer={(playerIndex) => dispatch({ type: 'MATCH_SELECT_PLAYER', playerIndex })}
