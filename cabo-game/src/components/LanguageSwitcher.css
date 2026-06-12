@@ -1,0 +1,30 @@
+.language-switcher {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.language-switcher__option {
+  border: 1px solid var(--line-soft);
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 999px;
+  padding: 7px 14px;
+  min-height: 36px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
+}
+
+.language-switcher__option:hover {
+  border-color: var(--line-strong);
+  color: var(--gold-200);
+}
+
+.language-switcher__option--active {
+  background: linear-gradient(180deg, var(--gold-200) 0%, var(--gold-500) 100%);
+  border-color: rgba(255, 240, 200, 0.6);
+  color: var(--ink);
+  text-shadow: 0 1px 0 rgba(255, 248, 224, 0.4);
+}

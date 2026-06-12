@@ -1,0 +1,195 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  /* ---- palette: casino table ---- */
+  --felt-deep: #081d12;
+  --felt: #0f2e1e;
+  --felt-light: #17422b;
+  --felt-glow: #2c6b45;
+
+  --surface: rgba(7, 22, 14, 0.6);
+  --surface-solid: #10291b;
+  --surface-raised: #143323;
+
+  --line-soft: rgba(212, 175, 55, 0.18);
+  --line: rgba(212, 175, 55, 0.36);
+  --line-strong: rgba(212, 175, 55, 0.62);
+
+  --gold-100: #f7ecc6;
+  --gold-200: #f1dc9a;
+  --gold-300: #e7c869;
+  --gold-500: #d4af37;
+  --gold-700: #8a6d1f;
+
+  --cream: #faf6ea;
+  --cream-dim: #efe6ce;
+  --ink: #2b2418;
+
+  --text: #f1ead6;
+  --text-muted: #cdc6ad;
+  --text-faint: #9b977f;
+
+  --red: #e25c5c;
+  --red-deep: #a32638;
+  --green-pos: #6fd092;
+  --cyan: #4dd6e8;
+  --navy: #1b2a52;
+
+  /* ---- shape & depth ---- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.55);
+
+  /* ---- spacing scale ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* ---- type ---- */
+  --font-display: 'Cinzel', Georgia, 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  --font-body: 'Hiragino Kaku Gothic ProN', 'Segoe UI', system-ui, sans-serif;
+
+  font-family: var(--font-body);
+  color-scheme: dark;
+  color: var(--text);
+  background-color: var(--felt-deep);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  background-color: var(--felt-deep);
+  /* felt texture: subtle SVG noise over a lamplit table gradient */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 120% 70% at 50% -8%, rgba(58, 130, 86, 0.5), transparent 62%),
+    radial-gradient(ellipse 130% 80% at 50% 112%, rgba(0, 0, 0, 0.55), transparent 58%),
+    linear-gradient(180deg, #143726 0%, #0b2316 100%);
+  background-attachment: fixed;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  font-family: inherit;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* ---- accessibility ---- */
+:focus-visible {
+  outline: 2px solid var(--gold-300);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---- shared button system ---- */
+.btn {
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: 10px 18px;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    background 0.12s ease,
+    border-color 0.12s ease,
+    opacity 0.12s ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  background: linear-gradient(180deg, var(--gold-200) 0%, var(--gold-500) 60%, #b8922b 100%);
+  border-color: rgba(255, 240, 200, 0.5);
+  color: var(--ink);
+  text-shadow: 0 1px 0 rgba(255, 248, 224, 0.4);
+  box-shadow: 0 3px 12px rgba(212, 175, 55, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.btn--primary:hover:not(:disabled) {
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.btn--secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background: rgba(212, 175, 55, 0.12);
+  border-color: var(--line-strong);
+}
+
+.btn--ghost {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.16);
+  color: var(--text-muted);
+}
+
+.btn--ghost:hover:not(:disabled) {
+  border-color: var(--line);
+  color: var(--gold-200);
+}
+
+.btn--cabo {
+  background: linear-gradient(180deg, #c3344a 0%, var(--red-deep) 100%);
+  border-color: rgba(255, 180, 180, 0.35);
+  color: #fff;
+  box-shadow: 0 3px 12px rgba(163, 38, 56, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn--cabo:hover:not(:disabled) {
+  box-shadow: 0 6px 18px rgba(163, 38, 56, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}

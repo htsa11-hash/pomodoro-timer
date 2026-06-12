@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 168">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="85%">
+      <stop offset="0%" stop-color="#26407c"/>
+      <stop offset="100%" stop-color="#121d3b"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f1dc9a"/>
+      <stop offset="55%" stop-color="#d4af37"/>
+      <stop offset="100%" stop-color="#a9852b"/>
+    </linearGradient>
+    <linearGradient id="crimson" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8e2436"/>
+      <stop offset="100%" stop-color="#5f1622"/>
+    </linearGradient>
+    <pattern id="lattice" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45 60 84)">
+      <path d="M0 0H12M0 6H12" stroke="#3c5290" stroke-width="1"/>
+      <circle cx="3" cy="3" r="0.9" fill="#c9a84f"/>
+      <circle cx="9" cy="9" r="0.9" fill="#c9a84f"/>
+    </pattern>
+  </defs>
+
+  <!-- field -->
+  <rect width="120" height="168" rx="10" fill="url(#bg)"/>
+  <rect width="120" height="168" rx="10" fill="url(#lattice)" opacity="0.3"/>
+
+  <!-- double gold frame -->
+  <rect x="4.5" y="4.5" width="111" height="159" rx="7" fill="none" stroke="url(#gold)" stroke-width="2.5"/>
+  <rect x="9" y="9" width="102" height="150" rx="5" fill="none" stroke="#d4af37" stroke-width="0.8" opacity="0.65"/>
+
+  <!-- corner ornaments -->
+  <g fill="url(#gold)">
+    <path d="M17 12l3.5 5-3.5 5-3.5-5z"/>
+    <path d="M103 12l3.5 5-3.5 5-3.5-5z"/>
+    <path d="M17 146l3.5 5-3.5 5-3.5-5z"/>
+    <path d="M103 146l3.5 5-3.5 5-3.5-5z"/>
+  </g>
+  <g fill="none" stroke="#d4af37" stroke-width="0.8" opacity="0.7">
+    <path d="M13 26q8 0 13-9"/>
+    <path d="M107 26q-8 0-13-9"/>
+    <path d="M13 142q8 0 13 9"/>
+    <path d="M107 142q-8 0-13 9"/>
+  </g>
+
+  <!-- upper / lower motifs -->
+  <g fill="url(#gold)" opacity="0.9">
+    <path d="M60 21l4.5 7-4.5 7-4.5-7z"/>
+    <circle cx="49" cy="28" r="1.4"/>
+    <circle cx="71" cy="28" r="1.4"/>
+    <path d="M60 133l4.5 7-4.5 7-4.5-7z"/>
+    <circle cx="49" cy="140" r="1.4"/>
+    <circle cx="71" cy="140" r="1.4"/>
+  </g>
+
+  <!-- central medallion -->
+  <g transform="translate(60 84)">
+    <path d="M0 -42 L31 0 L0 42 L-31 0 Z" fill="url(#crimson)" stroke="url(#gold)" stroke-width="2"/>
+    <path d="M0 -35 L25.5 0 L0 35 L-25.5 0 Z" fill="none" stroke="#ecd189" stroke-width="0.8" opacity="0.8"/>
+    <text y="4.5" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="12.5" font-weight="700" letter-spacing="1.4" fill="#f1dc9a">CABO</text>
+    <path d="M0 -24l3 4.5-3 4.5-3-4.5z" fill="#f1dc9a" opacity="0.9"/>
+    <path d="M0 15l3 4.5-3 4.5-3-4.5z" fill="#f1dc9a" opacity="0.9"/>
+  </g>
+</svg>

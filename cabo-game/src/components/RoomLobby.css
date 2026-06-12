@@ -1,0 +1,152 @@
+.room-lobby {
+  background: linear-gradient(180deg, var(--surface-raised) 0%, var(--surface-solid) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.room-lobby__title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--gold-200);
+  letter-spacing: 0.06em;
+  text-shadow: 0 1px 10px rgba(212, 175, 55, 0.35);
+}
+
+.room-lobby__code {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.room-lobby__code-label {
+  font-size: 11px;
+  color: var(--gold-300);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.room-lobby__code-value {
+  font-family: var(--font-display);
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: 10px;
+  margin-right: -10px;
+  color: var(--gold-100);
+  text-shadow: 0 2px 12px rgba(212, 175, 55, 0.45);
+}
+
+.room-lobby__hint {
+  font-size: 12px;
+  color: var(--text-faint);
+  text-align: center;
+  margin: 0;
+}
+
+.room-lobby__players {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.room-lobby__player {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-weight: 700;
+  color: var(--cream);
+}
+
+.room-lobby__player--empty {
+  color: var(--text-faint);
+  font-weight: 400;
+  font-style: italic;
+  border-style: dashed;
+}
+
+.room-lobby__player-tags {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.room-lobby__tag {
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(212, 175, 55, 0.16);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  color: var(--gold-200);
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+
+.room-lobby__tag--you {
+  background: rgba(111, 208, 146, 0.14);
+  border-color: rgba(111, 208, 146, 0.4);
+  color: var(--green-pos);
+}
+
+.room-lobby__setup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border-top: 1px dashed var(--line-soft);
+  padding-top: var(--space-4);
+}
+
+.room-lobby__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.room-lobby__field > label {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--gold-100);
+  letter-spacing: 0.04em;
+}
+
+.room-lobby__field input {
+  border: 1px solid var(--line-soft);
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text);
+  border-radius: var(--radius-md);
+  padding: 11px 12px;
+  min-height: 44px;
+  font-size: 14px;
+  transition: border-color 0.12s ease;
+}
+
+.room-lobby__field input:focus {
+  outline: none;
+  border-color: var(--gold-500);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+}
+
+.room-lobby__waiting {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+  border-top: 1px dashed var(--line-soft);
+  padding-top: var(--space-4);
+  margin: 0;
+}
