@@ -124,8 +124,16 @@ export async function startGame(code: string, room: RoomDoc, startingCoins: numb
 export async function dispatchGameAction(code: string, room: RoomDoc, isHost: boolean, action: GameAction): Promise<void> {
   if (isHost) {
     if (!room.gameState) return
-    const next = gameReducer(room.gameState, action)
-    await updateDoc(roomRef(code), { gameState: next })
+    const ref = roomRef(code)
+    // Read-modify-write inside a transaction so a concurrently-processed guest
+    // action (see subscribeActions) can't be silently overwritten by a stale read.
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(ref)
+      const current = snap.data() as RoomDoc | undefined
+      if (!current?.gameState) return
+      const next = gameReducer(current.gameState, action)
+      tx.update(ref, { gameState: next })
+    })
     return
   }
   await addDoc(actionsRef(code), { action, createdAt: serverTimestamp() })
@@ -141,13 +149,10 @@ export function subscribeActions(
 ): Unsubscribe {
   const processed = new Set<string>()
   const q = query(actionsRef(code), orderBy('createdAt'))
+  const ref = roomRef(code)
 
   return onSnapshot(q, async (snap) => {
-    let state = getGameState()
-    if (!state) return
-
-    const toDelete: string[] = []
-    let changed = false
+    const pending: { id: string; action: GameAction }[] = []
 
     for (const change of snap.docChanges()) {
       if (change.type === 'removed') continue
@@ -157,14 +162,26 @@ export function subscribeActions(
       if (data.createdAt == null) continue
 
       processed.add(id)
-      state = gameReducer(state, data.action)
-      toDelete.push(id)
-      changed = true
+      pending.push({ id, action: data.action })
     }
 
-    if (!changed) return
-    await updateDoc(roomRef(code), { gameState: state })
-    await Promise.all(toDelete.map((id) => deleteDoc(doc(db, 'rooms', code, 'actions', id))))
+    if (pending.length === 0) return
+
+    // Read-modify-write inside a transaction so concurrent dispatches (host
+    // actions or overlapping snapshot callbacks) can't clobber each other's
+    // updates with a stale `gameState` read.
+    await runTransaction(db, async (tx) => {
+      const snapDoc = await tx.get(ref)
+      const current = snapDoc.data() as RoomDoc | undefined
+      let state = current?.gameState ?? getGameState()
+      if (!state) return
+      for (const { action } of pending) {
+        state = gameReducer(state, action)
+      }
+      tx.update(ref, { gameState: state })
+    })
+
+    await Promise.all(pending.map(({ id }) => deleteDoc(doc(db, 'rooms', code, 'actions', id))))
   })
 }
 
