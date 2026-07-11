@@ -6,7 +6,7 @@
 const targetDate = new Date(Date.UTC(2026, 7, 9, 1, 0, 0)); // = Marrakesh 02:00 (UTC+1)
 
 // 起算日 (フライトパスが0%になる基準日。必要に応じて変更してください)
-const startDate = new Date(Date.UTC(2026, 6, 11, 0, 0, 0)); // 2026-07-11
+const startDate = new Date(Date.UTC(2026, 1, 19, 0, 0, 0)); // 2026-02-19
 
 const label = "Marrakeshまで";
 
@@ -43,6 +43,11 @@ const remainDashes = pathLength - filled;
 const leftDashes = "┄".repeat(filled);
 const rightDashes = "┄".repeat(remainDashes);
 
+// ===== 飛行機アイコン (横向きのシンプルなシルエット) =====
+const planeSymbol = SFSymbol.named("airplane");
+planeSymbol.applyFont(Font.systemFont(12));
+const planeTint = Color.dynamic(Color.black(), Color.white());
+
 // ===== ウィジェット構築 =====
 let widget = new ListWidget();
 widget.setPadding(6, 10, 6, 10);
@@ -55,9 +60,10 @@ if (family === "accessoryCircular") {
   stack.layoutVertically();
   stack.centerAlignContent();
 
-  const plane = stack.addText("✈️");
-  plane.font = Font.systemFont(14);
-  plane.centerAlignText();
+  const plane = stack.addImage(planeSymbol.image);
+  plane.imageSize = new Size(13, 13);
+  plane.tintColor = planeTint;
+  plane.centerAlignImage();
 
   const pctText = stack.addText(`${percent}%`);
   pctText.font = Font.boldSystemFont(16);
@@ -90,8 +96,9 @@ if (family === "accessoryCircular") {
   leftDashText.font = Font.systemFont(12);
   leftDashText.minimumScaleFactor = 0.6;
 
-  const planeText = pathStack.addText("✈️");
-  planeText.font = Font.systemFont(16);
+  const planeImg = pathStack.addImage(planeSymbol.image);
+  planeImg.imageSize = new Size(12, 12);
+  planeImg.tintColor = planeTint;
 
   const rightDashText = pathStack.addText(rightDashes);
   rightDashText.font = Font.systemFont(12);
