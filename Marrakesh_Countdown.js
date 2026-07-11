@@ -36,12 +36,14 @@ if (isPast) {
 }
 
 // ===== フライトパス風の進捗表現 =====
-// 📍 ┄┄┄ ✈️ ┄┄┄┄┄ 📍  のように、飛行機の位置で進捗を表す
-const pathLength = 12;
-const filled = Math.max(0, Math.min(pathLength, Math.round((percent / 100) * pathLength)));
-const remainDashes = pathLength - filled;
-const leftDashes = "┄".repeat(filled);
-const rightDashes = "┄".repeat(remainDashes);
+// 📍 ┄┄┄ ✈ ┄┄┄┄┄ 📍  のように、飛行機の位置で進捗を表す
+function makeDashes(pathLength) {
+  const filled = Math.max(0, Math.min(pathLength, Math.round((percent / 100) * pathLength)));
+  return {
+    left: "┄".repeat(filled),
+    right: "┄".repeat(pathLength - filled),
+  };
+}
 
 // ===== 飛行機アイコン (横向きのシンプルなシルエット) =====
 const planeSymbol = SFSymbol.named("airplane");
@@ -79,48 +81,64 @@ if (family === "accessoryCircular") {
   text.font = Font.systemFont(14);
 
 } else {
-  // ロック画面: 長方形 (accessoryRectangular) / ホーム画面小
-  const titleText = widget.addText(label);
-  titleText.font = Font.systemFont(11);
+  // ロック画面: 長方形 (accessoryRectangular) / ホーム画面 (小・中・大)
+  // ホーム画面の中・大サイズでは全体を拡大表示する
+  const isMedium = family === "medium";
+  const isLarge = family === "large";
+  const scale = isLarge ? 2.4 : isMedium ? 1.7 : 1;
+  const pathLength = isLarge ? 20 : isMedium ? 16 : 12;
+  const dashes = makeDashes(pathLength);
 
-  widget.addSpacer(3);
+  if (isMedium || isLarge) {
+    widget.setPadding(16, 20, 16, 20);
+    widget.addSpacer();
+  }
+
+  const titleText = widget.addText(label);
+  titleText.font = Font.systemFont(Math.round(11 * scale));
+
+  widget.addSpacer(3 * scale);
 
   const pathStack = widget.addStack();
   pathStack.layoutHorizontally();
   pathStack.centerAlignContent();
 
   const startPin = pathStack.addText("📍");
-  startPin.font = Font.systemFont(9);
+  startPin.font = Font.systemFont(Math.round(9 * scale));
 
-  const leftDashText = pathStack.addText(leftDashes);
-  leftDashText.font = Font.systemFont(12);
+  const leftDashText = pathStack.addText(dashes.left);
+  leftDashText.font = Font.systemFont(Math.round(12 * scale));
   leftDashText.minimumScaleFactor = 0.6;
 
   const planeImg = pathStack.addImage(planeSymbol.image);
-  planeImg.imageSize = new Size(12, 12);
+  planeImg.imageSize = new Size(Math.round(12 * scale), Math.round(12 * scale));
   planeImg.tintColor = planeTint;
 
-  const rightDashText = pathStack.addText(rightDashes);
-  rightDashText.font = Font.systemFont(12);
+  const rightDashText = pathStack.addText(dashes.right);
+  rightDashText.font = Font.systemFont(Math.round(12 * scale));
   rightDashText.minimumScaleFactor = 0.6;
 
   const endPin = pathStack.addText("📍");
-  endPin.font = Font.systemFont(9);
+  endPin.font = Font.systemFont(Math.round(9 * scale));
 
-  widget.addSpacer(3);
+  widget.addSpacer(3 * scale);
 
   const bottomStack = widget.addStack();
   bottomStack.layoutHorizontally();
   bottomStack.centerAlignContent();
 
   const bigLabel = bottomStack.addText(bigText);
-  bigLabel.font = Font.boldSystemFont(16);
+  bigLabel.font = Font.boldSystemFont(Math.round(16 * scale));
   bigLabel.minimumScaleFactor = 0.7;
 
   bottomStack.addSpacer();
 
   const pctLabel = bottomStack.addText(`${percent}%`);
-  pctLabel.font = Font.systemFont(12);
+  pctLabel.font = Font.systemFont(Math.round(12 * scale));
+
+  if (isMedium || isLarge) {
+    widget.addSpacer();
+  }
 }
 
 // 1時間ごとを目安に更新
