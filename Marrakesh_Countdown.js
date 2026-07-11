@@ -38,10 +38,11 @@ if (isPast) {
 // ===== フライトパス風の進捗表現 =====
 // ● ┄┄┄ ✈ ┄┄┄ ● の経路を1枚の画像として描画する
 // (文字の点線と違い、幅からはみ出して折り返すことがない)
-function makePathImage(w, h, forceWhite) {
-  const dark = forceWhite || Device.isUsingDarkAppearance();
-  const lineColor = dark ? new Color("#ffffff", 0.6) : new Color("#000000", 0.45);
-  const planeColor = dark ? Color.white() : Color.black();
+function makePathImage(w, h) {
+  // ライト/ダークどちらの背景でも見える固定色を使う
+  // (ウィジェット描画時は外観モードの検出が当てにならないため)
+  const lineColor = new Color("#98989d", 0.8);
+  const planeColor = new Color("#ff9f0a");
   const pinColor = new Color("#ff453a");
 
   const ctx = new DrawContext();
@@ -137,7 +138,7 @@ if (family === "accessoryCircular") {
 
   const pathW = isLarge ? 300 : isMedium ? 270 : 140;
   const pathH = isLarge ? 30 : isMedium ? 24 : 16;
-  const pathImg = widget.addImage(makePathImage(pathW, pathH, family === "accessoryRectangular"));
+  const pathImg = widget.addImage(makePathImage(pathW, pathH));
   pathImg.imageSize = new Size(pathW, pathH);
   pathImg.leftAlignImage();
 
