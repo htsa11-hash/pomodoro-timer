@@ -36,13 +36,51 @@ if (isPast) {
 }
 
 // ===== フライトパス風の進捗表現 =====
-// 📍 ┄┄┄ ✈ ┄┄┄┄┄ 📍  のように、飛行機の位置で進捗を表す
-function makeDashes(pathLength) {
-  const filled = Math.max(0, Math.min(pathLength, Math.round((percent / 100) * pathLength)));
-  return {
-    left: "┄".repeat(filled),
-    right: "┄".repeat(pathLength - filled),
-  };
+// ● ┄┄┄ ✈ ┄┄┄ ● の経路を1枚の画像として描画する
+// (文字の点線と違い、幅からはみ出して折り返すことがない)
+function makePathImage(w, h, forceWhite) {
+  const dark = forceWhite || Device.isUsingDarkAppearance();
+  const lineColor = dark ? new Color("#ffffff", 0.6) : new Color("#000000", 0.45);
+  const planeColor = dark ? Color.white() : Color.black();
+  const pinColor = new Color("#ff453a");
+
+  const ctx = new DrawContext();
+  ctx.size = new Size(w, h);
+  ctx.opaque = false;
+  ctx.respectScreenScale = true;
+
+  const midY = h / 2;
+  const pinR = h * 0.14;
+  const startX = pinR + 1;
+  const endX = w - pinR - 1;
+
+  const planeFont = h * 0.85;
+  const planeCx = startX + (endX - startX) * clampedProgress;
+  const planeHalf = planeFont * 0.62;
+
+  // 点線 (飛行機の位置は避けて描く)
+  const lineTh = Math.max(1.5, h * 0.06);
+  const dashLen = h * 0.28;
+  const gapLen = dashLen * 0.9;
+  ctx.setFillColor(lineColor);
+  for (let x = startX + pinR + 3; x < endX - pinR - 3; x += dashLen + gapLen) {
+    if (x + dashLen > planeCx - planeHalf && x < planeCx + planeHalf) continue;
+    const len = Math.min(dashLen, endX - pinR - 3 - x);
+    ctx.fillRect(new Rect(x, midY - lineTh / 2, len, lineTh));
+  }
+
+  // 出発地・目的地のピン
+  ctx.setFillColor(pinColor);
+  ctx.fillEllipse(new Rect(startX - pinR, midY - pinR, pinR * 2, pinR * 2));
+  ctx.fillEllipse(new Rect(endX - pinR, midY - pinR, pinR * 2, pinR * 2));
+
+  // 進捗位置の飛行機 (横向きのシンプルなシルエット)
+  ctx.setTextColor(planeColor);
+  ctx.setFont(Font.systemFont(planeFont));
+  ctx.setTextAlignedCenter();
+  ctx.drawTextInRect("✈︎", new Rect(planeCx - planeFont, midY - planeFont * 0.62, planeFont * 2, planeFont * 1.3));
+
+  return ctx.getImage();
 }
 
 // ===== 飛行機アイコン (横向きのシンプルなシルエット) =====
@@ -86,8 +124,6 @@ if (family === "accessoryCircular") {
   const isMedium = family === "medium";
   const isLarge = family === "large";
   const scale = isLarge ? 2.4 : isMedium ? 1.7 : 1;
-  const pathLength = isLarge ? 20 : isMedium ? 16 : 12;
-  const dashes = makeDashes(pathLength);
 
   if (isMedium || isLarge) {
     widget.setPadding(16, 20, 16, 20);
@@ -97,31 +133,15 @@ if (family === "accessoryCircular") {
   const titleText = widget.addText(label);
   titleText.font = Font.systemFont(Math.round(11 * scale));
 
-  widget.addSpacer(3 * scale);
+  widget.addSpacer(4 * scale);
 
-  const pathStack = widget.addStack();
-  pathStack.layoutHorizontally();
-  pathStack.centerAlignContent();
+  const pathW = isLarge ? 300 : isMedium ? 270 : 140;
+  const pathH = isLarge ? 30 : isMedium ? 24 : 16;
+  const pathImg = widget.addImage(makePathImage(pathW, pathH, family === "accessoryRectangular"));
+  pathImg.imageSize = new Size(pathW, pathH);
+  pathImg.leftAlignImage();
 
-  const startPin = pathStack.addText("📍");
-  startPin.font = Font.systemFont(Math.round(9 * scale));
-
-  const leftDashText = pathStack.addText(dashes.left);
-  leftDashText.font = Font.systemFont(Math.round(12 * scale));
-  leftDashText.minimumScaleFactor = 0.6;
-
-  const planeImg = pathStack.addImage(planeSymbol.image);
-  planeImg.imageSize = new Size(Math.round(12 * scale), Math.round(12 * scale));
-  planeImg.tintColor = planeTint;
-
-  const rightDashText = pathStack.addText(dashes.right);
-  rightDashText.font = Font.systemFont(Math.round(12 * scale));
-  rightDashText.minimumScaleFactor = 0.6;
-
-  const endPin = pathStack.addText("📍");
-  endPin.font = Font.systemFont(Math.round(9 * scale));
-
-  widget.addSpacer(3 * scale);
+  widget.addSpacer(4 * scale);
 
   const bottomStack = widget.addStack();
   bottomStack.layoutHorizontally();
