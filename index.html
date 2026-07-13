@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ポモドーロ">
+<meta name="theme-color" content="#e67e22">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
 <title>ポモドーロ・タイマー</title>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -10,6 +16,7 @@
   <div class="app">
     <h1>🍅 ポモドーロ・タイマー</h1>
     <a class="nav-link" href="vocab/index.html">📖 私たちの単語帳へ</a>
+    <a class="nav-link" href="widget.html">📱 ウィジェット表示へ</a>
 
     <div class="mode-buttons">
       <button class="mode-btn active" data-mode="work">作業 (25分)</button>
@@ -38,6 +45,7 @@
 
   <audio id="alarmSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
 
+  <script src="timer-state.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

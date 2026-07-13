@@ -1,9 +1,3 @@
-const MODES = {
-  work: { label: '作業', minutes: 25 },
-  short: { label: '小休憩', minutes: 5 },
-  long: { label: '長休憩', minutes: 15 },
-};
-
 const timerDisplay = document.getElementById('timerDisplay');
 const startBtn = document.getElementById('startBtn');
 const pauseBtn = document.getElementById('pauseBtn');
@@ -15,60 +9,66 @@ const taskList = document.getElementById('taskList');
 const pomodoroCountEl = document.getElementById('pomodoroCount');
 const alarmSound = document.getElementById('alarmSound');
 
-let currentMode = 'work';
-let remainingSeconds = MODES[currentMode].minutes * 60;
-let intervalId = null;
+let state = loadState();
+let tickId = null;
 let pomodoroCount = Number(localStorage.getItem('pomodoroCount') || 0);
 let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
 
 pomodoroCountEl.textContent = pomodoroCount;
 
-function updateDisplay() {
-  const minutes = Math.floor(remainingSeconds / 60);
-  const seconds = remainingSeconds % 60;
-  timerDisplay.textContent =
-    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+function render() {
+  const remaining = getRemainingSeconds(state);
+  timerDisplay.textContent = formatTime(remaining);
+  modeButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.mode === state.mode));
+  startBtn.disabled = state.running;
+  pauseBtn.disabled = !state.running;
+}
+
+function tick() {
+  const remaining = getRemainingSeconds(state);
+  if (remaining <= 0 && state.running) {
+    handleFinish();
+    return;
+  }
+  render();
+}
+
+function handleFinish() {
+  stopTimer();
+  alarmSound.play().catch(() => {});
+  if (state.mode === 'work') {
+    pomodoroCount += 1;
+    pomodoroCountEl.textContent = pomodoroCount;
+    localStorage.setItem('pomodoroCount', pomodoroCount);
+  }
+  switchMode(state.mode === 'work' ? 'short' : 'work');
 }
 
 function switchMode(mode) {
-  currentMode = mode;
-  remainingSeconds = MODES[mode].minutes * 60;
-  modeButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.mode === mode));
-  updateDisplay();
-  stopTimer();
+  state = { mode, running: false, endTime: null, remainingSeconds: MODES[mode].minutes * 60 };
+  saveState(state);
+  render();
 }
 
 function startTimer() {
-  if (intervalId) return;
-  intervalId = setInterval(() => {
-    remainingSeconds -= 1;
-    updateDisplay();
-    if (remainingSeconds <= 0) {
-      stopTimer();
-      alarmSound.play().catch(() => {});
-      if (currentMode === 'work') {
-        pomodoroCount += 1;
-        pomodoroCountEl.textContent = pomodoroCount;
-        localStorage.setItem('pomodoroCount', pomodoroCount);
-      }
-      switchMode(currentMode === 'work' ? 'short' : 'work');
-    }
-  }, 1000);
-  startBtn.disabled = true;
-  pauseBtn.disabled = false;
+  if (state.running) return;
+  const remaining = getRemainingSeconds(state);
+  state = { ...state, running: true, endTime: Date.now() + remaining * 1000 };
+  saveState(state);
+  render();
 }
 
 function stopTimer() {
-  clearInterval(intervalId);
-  intervalId = null;
-  startBtn.disabled = false;
-  pauseBtn.disabled = true;
+  const remaining = getRemainingSeconds(state);
+  state = { ...state, running: false, endTime: null, remainingSeconds: remaining };
+  saveState(state);
+  render();
 }
 
 function resetTimer() {
-  stopTimer();
-  remainingSeconds = MODES[currentMode].minutes * 60;
-  updateDisplay();
+  state = { ...state, running: false, endTime: null, remainingSeconds: MODES[state.mode].minutes * 60 };
+  saveState(state);
+  render();
 }
 
 modeButtons.forEach((btn) => {
@@ -78,6 +78,19 @@ modeButtons.forEach((btn) => {
 startBtn.addEventListener('click', startTimer);
 pauseBtn.addEventListener('click', stopTimer);
 resetBtn.addEventListener('click', resetTimer);
+
+window.addEventListener('storage', (e) => {
+  if (e.key === 'timerState') {
+    state = loadState();
+    render();
+  }
+  if (e.key === 'pomodoroCount') {
+    pomodoroCount = Number(e.newValue || 0);
+    pomodoroCountEl.textContent = pomodoroCount;
+  }
+});
+
+tickId = setInterval(tick, 1000);
 
 function saveTasks() {
   localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -132,5 +145,11 @@ taskForm.addEventListener('submit', (e) => {
   renderTasks();
 });
 
-updateDisplay();
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+render();
 renderTasks();

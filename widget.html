@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="🍅 ウィジェット">
+<meta name="theme-color" content="#e67e22">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="widget-manifest.json">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="widget.css">
+<title>ポモドーロ・ウィジェット</title>
+</head>
+<body class="widget-body">
+  <div class="widget">
+    <div class="widget-mode" id="widgetMode">作業</div>
+    <div class="widget-display" id="widgetDisplay">25:00</div>
+    <div class="widget-controls">
+      <button id="widgetToggleBtn">開始</button>
+      <button id="widgetResetBtn">リセット</button>
+    </div>
+    <a class="widget-link" href="index.html">アプリを開く →</a>
+  </div>
+
+  <script src="timer-state.js"></script>
+  <script src="widget.js"></script>
+</body>
+</html>
